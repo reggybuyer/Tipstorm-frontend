@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = "https://tipstorm-web-app-1.onrender.com";
+const API = process.env.REACT_APP_API_BASE;
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -18,11 +18,12 @@ export default function User() {
     window.location.href = "/login";
   }
 
-  // PROFILE LOAD (stable with useCallback)
   const loadProfile = useCallback(async () => {
     try {
       const res = await fetch(`${API}/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -44,33 +45,39 @@ export default function User() {
       }
 
       setUser(userData);
-    } catch {
+    } catch (err) {
+      console.error("Profile error:", err);
       logout();
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  // ACCESS CONTROL
   function hasAccess(slipAccess) {
     if (!user) return false;
     if (slipAccess === "free") return true;
     if (!user.premium) return false;
+
     if (user.plan === "weekly") return slipAccess === "weekly";
-    if (user.plan === "monthly") return slipAccess === "weekly" || slipAccess === "monthly";
+    if (user.plan === "monthly")
+      return slipAccess === "weekly" || slipAccess === "monthly";
     if (user.plan === "vip") return true;
+
     return false;
   }
 
-  // SLIPS LOAD
   async function loadSlips(newPage = 1) {
     try {
-      const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+      const res = await fetch(
+        `${API}/slips?page=${newPage}&limit=${limit}`
+      );
       const data = await res.json();
+
       setSlips(data.slips || []);
       setPages(data.pages || 1);
       setPage(newPage);
-    } catch {
+    } catch (err) {
+      console.error("Slips error:", err);
       setSlips([]);
     }
   }
@@ -99,7 +106,8 @@ export default function User() {
           message: "User request activation",
         }),
       });
-      alert("Request sent. Pay and send confirmation.");
+
+      alert("Request sent successfully");
     } catch {
       alert("Request failed");
     }
@@ -110,59 +118,35 @@ export default function User() {
       window.location.href = "/login";
       return;
     }
+
     loadProfile();
     loadSlips(1);
   }, [token, loadProfile]);
 
-  if (loading) {
-    return (
-      <div className="section">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="section">
-        <p>Session expired. Please login again.</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="section"><p>Loading...</p></div>;
+  if (!user) return <div className="section"><p>Session expired.</p></div>;
 
   return (
     <div className="section">
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h2>Welcome, {user.email}</h2>
-        <button className="logout" onClick={logout}>
-          Logout
-        </button>
+        <button onClick={logout}>Logout</button>
       </div>
 
       {user.premium && (
-        <p
-          className={`plan-badge ${
-            user.plan === "weekly"
-              ? "plan-weekly"
-              : user.plan === "monthly"
-              ? "plan-monthly"
-              : "plan-vip"
-          }`}
-        >
+        <p>
           {user.plan.toUpperCase()} — Expires in {getRemainingDays()} days
         </p>
       )}
 
       {user.plan !== "vip" && (
-        <div className="card upgrade-card">
+        <div>
           <h3>Upgrade Plan</h3>
           <p>
-            Email: <strong>{user.email}</strong>
-            <br />
-            Plan: <strong>{planSelect.toUpperCase()}</strong>
-            <br />
+            Plan: <strong>{planSelect.toUpperCase()}</strong><br />
             Amount: <strong>Ksh {getAmount()}</strong>
           </p>
+
           <select
             value={planSelect}
             onChange={(e) => setPlanSelect(e.target.value)}
@@ -171,67 +155,25 @@ export default function User() {
             <option value="monthly">Monthly - Ksh 1000</option>
             <option value="vip">VIP - Ksh 1500</option>
           </select>
-          <button className="success" onClick={requestActivation}>
+
+          <button onClick={requestActivation}>
             Request Activation
           </button>
         </div>
       )}
 
-      <button className="primary" onClick={() => loadSlips(1)}>
-        Load Slips
-      </button>
+      <button onClick={() => loadSlips(1)}>Load Slips</button>
 
-      <div className="grid">
-        {slips.length === 0 && <p>No slips available</p>}
+      {slips.map((slip) => {
+        const allowed = hasAccess(slip.access);
 
-        {slips.map((slip) => {
-          const allowed = hasAccess(slip.access);
-          return (
-            <div key={slip._id} className="card">
-              {!allowed && <div className="lock-overlay">Upgrade Plan</div>}
-
-              <div className="badge">
-                {slip.date} — {slip.access.toUpperCase()}
-              </div>
-
-              <div className={!allowed ? "blur-teams" : ""}>
-                <p>
-                  Total Odds:{" "}
-                  <span className="badge">{slip.totalOdds.toFixed(2)}</span>
-                </p>
-
-                {slip.games.map((g, i) => (
-                  <div key={i}>
-                    <strong>
-                      {g.home} vs {g.away}
-                    </strong>
-                    <br />
-                    Odd: <span className="badge">{g.odd}</span>
-                    <br />
-                    Over/Under: {g.overUnder || "N/A"}
-                    <br />
-                    Result:{" "}
-                    <span className={`badge ${g.result}`}>{g.result}</span>
-                    <hr />
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="pagination">
-        <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
-          Previous
-        </button>
-        <span>
-          Page {page} of {pages}
-        </span>
-        <button disabled={page >= pages} onClick={() => loadSlips(page + 1)}>
-          Next
-        </button>
-      </div>
+        return (
+          <div key={slip._id}>
+            {!allowed && <div>Upgrade Plan</div>}
+            <p>{slip.date} — {slip.access}</p>
+          </div>
+        );
+      })}
     </div>
   );
 } 
