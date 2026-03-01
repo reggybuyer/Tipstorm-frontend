@@ -11,14 +11,18 @@ export default function Admin() {
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-
   const limit = 10;
 
   useEffect(() => {
     const role = localStorage.getItem("role");
     if (role !== "admin") {
       window.location.href = "/admin-login";
+      return;
     }
+
+    loadUsers();
+    loadRequests();
+    loadSlips();
   }, []);
 
   function logout() {
@@ -59,6 +63,17 @@ export default function Admin() {
 
     alert("User activated");
     loadRequests();
+    loadUsers();
+  }
+
+  /* SLIPS */
+  async function loadSlips(newPage = 1) {
+    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+    const data = await res.json();
+
+    setSlips(data.slips || []);
+    setPages(data.pages || 1);
+    setPage(newPage);
   }
 
   /* CREATE SLIP */
@@ -97,17 +112,6 @@ export default function Admin() {
     loadSlips();
   }
 
-  /* LOAD SLIPS */
-  async function loadSlips(newPage = 1) {
-    const res = await fetch(
-      `${API}/slips?page=${newPage}&limit=${limit}`
-    );
-    const data = await res.json();
-    setSlips(data.slips || []);
-    setPages(data.pages || 1);
-    setPage(newPage);
-  }
-
   async function markResult(slipId, index, result) {
     const token = localStorage.getItem("token");
 
@@ -131,8 +135,13 @@ export default function Admin() {
         <button onClick={logout}>Logout</button>
       </div>
 
+      <h3>Total Users: {users.length}</h3>
+      <h3>Total Requests: {requests.length}</h3>
+      <h3>Total Slips: {slips.length}</h3>
+
       <div className="card">
         <h3>Create Slip</h3>
+
         <input
           type="date"
           value={date}
@@ -156,17 +165,20 @@ export default function Admin() {
               value={g.home}
               onChange={(e) => updateGame(i, "home", e.target.value)}
             />
+
             <input
               placeholder="Away"
               value={g.away}
               onChange={(e) => updateGame(i, "away", e.target.value)}
             />
+
             <input
               type="number"
               placeholder="Odd"
               value={g.odd}
               onChange={(e) => updateGame(i, "odd", e.target.value)}
             />
+
             <input
               placeholder="Over/Under"
               value={g.overUnder}
