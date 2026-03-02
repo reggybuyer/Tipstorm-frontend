@@ -43,21 +43,20 @@ body {
   margin-bottom: 14px;
 }
 
-/* GRID (modern slip cards) */
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 12px;
 }
 
-/* BADGES */
+/* BADGES (small & clean) */
 .badge {
-  padding: 12px;
+  padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  text-align: center;
   font-size: 12px;
+  display: inline-block;
+  text-align: center;
 }
 
 .badge.free {
@@ -68,7 +67,7 @@ body {
 .badge.vip {
   background: var(--vip);
   color: white;
-  box-shadow: 0 0 12px rgba(255, 152, 0, 0.6);
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
 }
 
 .badge.pending {
@@ -88,11 +87,10 @@ body {
 
 /* PLAN BADGES */
 .plan-badge {
-  display: inline-block;
   padding: 4px 10px;
+  font-size: 12px;
   border-radius: 18px;
   font-weight: 700;
-  font-size: 12px;
 }
 
 .plan-weekly {
@@ -108,13 +106,12 @@ body {
 .plan-vip {
   background: #fff4e0;
   color: #ff9800;
-  font-weight: 800;
 }
 
 /* VIP GLOW */
 .card.vip-glow {
   border: 1px solid var(--vip);
-  box-shadow: 0 0 16px rgba(255, 152, 0, 0.45);
+  box-shadow: 0 0 14px rgba(255, 152, 0, 0.35);
 }
 
 /* PREMIUM BLUR */
@@ -132,6 +129,7 @@ body {
   justify-content: center;
   font-weight: 600;
   border-radius: 10px;
+  text-align: center;
 }
 
 /* INPUTS */
@@ -252,14 +250,13 @@ table td {
   text-align: center;
 }
 
-/* SLIP CARD MODERN */
+/* SLIP CARD */
 .slip-card {
   background: var(--card);
   padding: 14px;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
   border: 1px solid var(--border);
-  position: relative;
 }
 
 .slip-header {
@@ -268,15 +265,16 @@ table td {
   align-items: center;
 }
 
-.slip-body {
-  margin-top: 8px;
-}
-
 .game-row {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
   padding: 4px 0;
+  gap: 10px;
+}
+
+.game-row span {
+  white-space: nowrap;
 }
 
 .slip-footer {
@@ -291,11 +289,7 @@ table td {
   margin-top: 8px;
 }
 
-.locked-card {
-  position: relative;
-}
-
-/* MODAL DETAILS */
+/* MODAL */
 .modal {
   position: fixed;
   inset: 0;
@@ -329,6 +323,7 @@ table td {
   .auth-wrapper {
     flex-direction: column;
   }
+
   .auth-left {
     padding: 30px 20px;
   }
@@ -340,6 +335,7 @@ table td {
     overflow-x: auto;
     white-space: nowrap;
   }
+
   .grid {
     grid-template-columns: 1fr;
   }
