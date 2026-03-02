@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API =
-  process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -23,11 +22,13 @@ export default function User() {
       const res = await fetch(`${API}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = await res.json();
       if (!data.success || !data.user) {
         logout();
         return;
       }
+
       setUser(data.user);
     } catch {
       logout();
@@ -71,6 +72,7 @@ export default function User() {
           message: "User requested manual activation",
         }),
       });
+
       alert("Payment request sent. Admin will activate.");
     } catch {
       alert("Request failed.");
@@ -94,11 +96,14 @@ export default function User() {
     loadSlips();
   }, [token, loadProfile]);
 
-  if (loading)
-    return <div className="section"><p>Loading...</p></div>;
+  if (loading) return <div className="section"><p>Loading...</p></div>;
+  if (!user) return <div className="section"><p>Session expired.</p></div>;
 
-  if (!user)
-    return <div className="section"><p>Session expired.</p></div>;
+  function resultBadge(result) {
+    if (result === "win") return "badge win";
+    if (result === "lost") return "badge lost";
+    return "badge pending";
+  }
 
   return (
     <div className="section">
@@ -134,7 +139,6 @@ export default function User() {
             ✔ email confirmation<br />
             ✔ WhatsApp: <strong>0789906001</strong>
           </p>
-
           <select
             value={planSelect}
             onChange={(e) => setPlanSelect(e.target.value)}
@@ -143,12 +147,10 @@ export default function User() {
             <option value="monthly">Monthly - Ksh 1000</option>
             <option value="vip">VIP - Ksh 1500</option>
           </select>
-
           <p className="amount-display">
             Selected: <strong>{planSelect.toUpperCase()}</strong><br />
             Amount: <strong>Ksh {getAmount()}</strong>
           </p>
-
           <button onClick={requestActivation}>
             Request Activation
           </button>
@@ -174,13 +176,6 @@ export default function User() {
               (acc, g) => acc * (parseFloat(g.odd) || 1),
               1
             );
-
-            const resultBadge = (result) =>
-              result === "win"
-                ? "badge win"
-                : result === "lost"
-                ? "badge lost"
-                : "badge pending";
 
             return (
               <div key={slip._id} className="slip-card">
@@ -240,7 +235,6 @@ export default function User() {
               ×
             </button>
             <h3>{selected.date}</h3>
-
             {selected.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
