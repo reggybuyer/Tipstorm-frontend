@@ -53,11 +53,11 @@ body {
 /* BADGES */
 .badge {
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--card);
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .badge.free {
@@ -89,10 +89,10 @@ body {
 /* PLAN BADGES */
 .plan-badge {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: 18px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .plan-weekly {

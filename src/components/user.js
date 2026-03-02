@@ -87,6 +87,12 @@ export default function User() {
     setSelected(null);
   }
 
+  function resultBadge(result) {
+    if (result === "win") return "badge win";
+    if (result === "lost") return "badge lost";
+    return "badge pending";
+  }
+
   useEffect(() => {
     if (!token) {
       window.location.href = "/login";
@@ -98,12 +104,6 @@ export default function User() {
 
   if (loading) return <div className="section"><p>Loading...</p></div>;
   if (!user) return <div className="section"><p>Session expired.</p></div>;
-
-  function resultBadge(result) {
-    if (result === "win") return "badge win";
-    if (result === "lost") return "badge lost";
-    return "badge pending";
-  }
 
   return (
     <div className="section">
@@ -208,7 +208,9 @@ export default function User() {
                     View Details
                   </button>
                 ) : (
-                  <div className="lock-overlay">Upgrade to view</div>
+                  <div className="lock-overlay">
+                    Premium slip — upgrade to view details
+                  </div>
                 )}
               </div>
             );
@@ -231,10 +233,9 @@ export default function User() {
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>
-              ×
-            </button>
+            <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date}</h3>
+
             {selected.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
