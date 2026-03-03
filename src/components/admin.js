@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API =
+  process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -28,6 +29,7 @@ export default function Admin() {
   }
 
   /* ================= USERS ================= */
+
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -37,6 +39,7 @@ export default function Admin() {
   }
 
   /* ================= REQUESTS ================= */
+
   async function loadRequests() {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -54,7 +57,6 @@ export default function Admin() {
       },
       body: JSON.stringify({ requestId: id }),
     });
-
     alert("User activated");
     loadRequests();
   }
@@ -129,7 +131,6 @@ export default function Admin() {
       `${API}/slips?page=${newPage}&limit=${limit}`
     );
     const data = await res.json();
-
     setSlips(data.slips || []);
     setPages(data.pages || 1);
     setPage(newPage);
@@ -149,9 +150,10 @@ export default function Admin() {
       }),
     });
 
-    alert("Result updated");
     loadSlips(page);
   }
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="section">
@@ -167,6 +169,7 @@ export default function Admin() {
       <h3>Total Slips: {slips.length}</h3>
 
       {/* ================= CREATE SLIP ================= */}
+
       <div className="card">
         <h3>Create Slip</h3>
 
@@ -244,6 +247,7 @@ export default function Admin() {
       </div>
 
       {/* ================= USERS ================= */}
+
       <div className="card">
         <h3>Users</h3>
         <button className="btn" onClick={loadUsers}>
@@ -259,6 +263,7 @@ export default function Admin() {
       </div>
 
       {/* ================= REQUESTS ================= */}
+
       <div className="card">
         <h3>Requests</h3>
         <button className="btn" onClick={loadRequests}>
@@ -269,6 +274,7 @@ export default function Admin() {
           <div key={r._id}>
             <strong>{r.email}</strong>
             <p>Plan: {r.plan}</p>
+
             <button
               className="btn btn-view"
               onClick={() => approve(r._id)}
@@ -280,8 +286,10 @@ export default function Admin() {
       </div>
 
       {/* ================= SLIPS ================= */}
+
       <div className="card">
         <h3>Slips</h3>
+
         <button className="btn" onClick={() => loadSlips(1)}>
           Load Slips
         </button>
@@ -289,22 +297,40 @@ export default function Admin() {
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
             <p>
-              {slip.date} — {slip.access.toUpperCase()}
+              {slip.date} — {slip.access?.toUpperCase()}
             </p>
 
             {slip.games.map((g, i) => (
               <div key={i} className="game-row">
+
                 <span>
                   {g.home} vs {g.away}
                 </span>
 
+                {/* ✅ Supports old and new format */}
                 <span>
-                  {g.type} {g.line}
+                  {g.type
+                    ? `${g.type} ${g.line}`
+                    : g.overUnder || ""}
                 </span>
 
                 <span>Odd: {g.odd}</span>
 
+                {/* Show current result */}
+                <span
+                  className={
+                    g.result === "win"
+                      ? "badge-win"
+                      : g.result === "lost"
+                      ? "badge-lost"
+                      : "badge-pending"
+                  }
+                >
+                  {g.result || "pending"}
+                </span>
+
                 <button
+                  className="badge-win"
                   onClick={() =>
                     markResult(slip._id, i, "win")
                   }
@@ -313,6 +339,7 @@ export default function Admin() {
                 </button>
 
                 <button
+                  className="badge-lost"
                   onClick={() =>
                     markResult(slip._id, i, "lost")
                   }
