@@ -73,7 +73,6 @@ export default function User() {
           message: "User requested manual activation",
         }),
       });
-
       alert("Payment request sent. Admin will activate.");
     } catch {
       alert("Request failed.");
@@ -93,16 +92,16 @@ export default function User() {
       window.location.href = "/login";
       return;
     }
-
     loadProfile();
     loadSlips();
   }, [token, loadProfile]);
 
-  if (loading) return <div className="section"><p>Loading...</p></div>;
-  if (!user) return <div className="section"><p>Session expired.</p></div>;
+  if (loading) return <div className="section">Loading...</div>;
+  if (!user) return <div className="section">Session expired.</div>;
 
   return (
     <div className="section">
+      {/* HEADER */}
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
         <button className="btn btn-logout" onClick={logout}>
@@ -113,7 +112,7 @@ export default function User() {
       {/* PREMIUM STATUS */}
       {user.premium ? (
         <div className="card premium-card">
-          <span className={`plan-badge plan-${user.plan}`}>
+          <span className="plan-badge plan-premium">
             {user.plan.toUpperCase()} PLAN
           </span>
 
@@ -121,7 +120,6 @@ export default function User() {
             Expires:{" "}
             <strong>{new Date(user.expiresAt).toDateString()}</strong>
           </p>
-
           <p>
             Remaining: <strong>{getRemainingDays()} days</strong>
           </p>
@@ -150,10 +148,7 @@ export default function User() {
             Amount: <strong>Ksh {getAmount()}</strong>
           </p>
 
-          <button
-            className="btn btn-upgrade"
-            onClick={requestActivation}
-          >
+          <button className="btn btn-upgrade" onClick={requestActivation}>
             Request Activation
           </button>
         </div>
@@ -170,12 +165,8 @@ export default function User() {
             const allowed =
               slip.access === "free" ||
               (user.premium &&
-                ((user.plan === "weekly" &&
-                  slip.access === "weekly") ||
-                  (user.plan === "monthly" &&
-                    (slip.access === "weekly" ||
-                      slip.access === "monthly")) ||
-                  user.plan === "vip"));
+                (user.plan === "vip" ||
+                  user.plan === slip.access));
 
             const totalOdds = slip.games?.reduce(
               (acc, g) => acc * (parseFloat(g.odd) || 1),
@@ -186,8 +177,7 @@ export default function User() {
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
                   <strong>{slip.date}</strong>
-
-                  <span className={`plan-badge plan-${slip.access}`}>
+                  <span className="plan-badge plan-free">
                     {slip.access.toUpperCase()}
                   </span>
                 </div>
@@ -199,12 +189,30 @@ export default function User() {
                         {g.home} vs {g.away}
                       </span>
 
+                      {/* Over/Under FIX */}
+                      {g.type && (
+                        <span
+                          className={`ou-badge ${
+                            g.type === "Over"
+                              ? "ou-over"
+                              : "ou-under"
+                          }`}
+                        >
+                          {g.type} {g.line}
+                        </span>
+                      )}
+
                       <span>Odd: {g.odd}</span>
 
+                      {/* Safe result */}
                       <span
-                        className={`result-badge result-${g.result?.toLowerCase()}`}
+                        className={`result-badge result-${
+                          g.result
+                            ? g.result.toLowerCase()
+                            : "pending"
+                        }`}
                       >
-                        {g.result}
+                        {g.result || "Pending"}
                       </span>
                     </div>
                   ))}
@@ -220,11 +228,11 @@ export default function User() {
                     className="btn btn-view"
                     onClick={() => openSlip(slip)}
                   >
-                    View Details
+                    View Full Slip
                   </button>
                 ) : (
                   <div className="lock-overlay">
-                    Premium slip — upgrade to view details
+                    Premium slip — upgrade to view
                   </div>
                 )}
               </div>
@@ -261,7 +269,7 @@ export default function User() {
               ×
             </button>
 
-            <h3>{selected.date}</h3>
+            <h3>{selected.date} - Full Details</h3>
 
             {selected.games?.map((g, i) => (
               <div key={i} className="game-row">
@@ -269,12 +277,28 @@ export default function User() {
                   {g.home} vs {g.away}
                 </span>
 
+                {g.type && (
+                  <span
+                    className={`ou-badge ${
+                      g.type === "Over"
+                        ? "ou-over"
+                        : "ou-under"
+                    }`}
+                  >
+                    {g.type} {g.line}
+                  </span>
+                )}
+
                 <span>Odd: {g.odd}</span>
 
                 <span
-                  className={`result-badge result-${g.result?.toLowerCase()}`}
+                  className={`result-badge result-${
+                    g.result
+                      ? g.result.toLowerCase()
+                      : "pending"
+                  }`}
                 >
-                  {g.result}
+                  {g.result || "Pending"}
                 </span>
               </div>
             ))}
