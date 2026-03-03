@@ -73,7 +73,7 @@ export default function User() {
           message: "User requested manual activation",
         }),
       });
-      alert("Payment request sent. Admin will activate.");
+      alert("Payment request sent. After payment, forward confirmation to WhatsApp 0789906001.");
     } catch {
       alert("Request failed.");
     }
@@ -109,10 +109,10 @@ export default function User() {
         </button>
       </div>
 
-      {/* PREMIUM STATUS */}
+      {/* PREMIUM STATUS OR UPGRADE */}
       {user.premium ? (
         <div className="card premium-card">
-          <span className="plan-badge plan-premium">
+          <span className={`plan-badge plan-${user.plan}`}>
             {user.plan.toUpperCase()} PLAN
           </span>
 
@@ -120,6 +120,7 @@ export default function User() {
             Expires:{" "}
             <strong>{new Date(user.expiresAt).toDateString()}</strong>
           </p>
+
           <p>
             Remaining: <strong>{getRemainingDays()} days</strong>
           </p>
@@ -128,10 +129,19 @@ export default function User() {
         <div className="card upgrade-card">
           <h3>Upgrade Plan</h3>
 
-          <p>
-            <strong>Paybill:</strong> 625625 <br />
-            <strong>Account:</strong> 20170457
-          </p>
+          <div className="payment-box">
+            <p><strong>Step 1:</strong> Pay via M-Pesa</p>
+            <p><strong>Paybill:</strong> 625625</p>
+            <p><strong>Account:</strong> 20170457</p>
+          </div>
+
+          <div className="payment-box">
+            <p><strong>Step 2:</strong> After payment</p>
+            <p>Forward M-Pesa confirmation message to:</p>
+            <p><strong>WhatsApp: 0789906001</strong></p>
+            <p>OR</p>
+            <p>Email: <strong>support@tipstorm.com</strong></p>
+          </div>
 
           <select
             value={planSelect}
@@ -142,11 +152,17 @@ export default function User() {
             <option value="vip">VIP - Ksh 1500</option>
           </select>
 
-          <p className="amount-display">
-            Selected: <strong>{planSelect.toUpperCase()}</strong>
+          <div className="amount-display">
+            Selected:
+            <span
+              className={`plan-badge plan-${planSelect}`}
+              style={{ marginLeft: "8px" }}
+            >
+              {planSelect.toUpperCase()}
+            </span>
             <br />
             Amount: <strong>Ksh {getAmount()}</strong>
-          </p>
+          </div>
 
           <button className="btn btn-upgrade" onClick={requestActivation}>
             Request Activation
@@ -165,8 +181,7 @@ export default function User() {
             const allowed =
               slip.access === "free" ||
               (user.premium &&
-                (user.plan === "vip" ||
-                  user.plan === slip.access));
+                (user.plan === "vip" || user.plan === slip.access));
 
             const totalOdds = slip.games?.reduce(
               (acc, g) => acc * (parseFloat(g.odd) || 1),
@@ -177,7 +192,7 @@ export default function User() {
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
                   <strong>{slip.date}</strong>
-                  <span className="plan-badge plan-free">
+                  <span className={`plan-badge plan-${slip.access}`}>
                     {slip.access.toUpperCase()}
                   </span>
                 </div>
@@ -185,11 +200,10 @@ export default function User() {
                 <div className={allowed ? "" : "blur-teams"}>
                   {slip.games?.map((g, i) => (
                     <div key={i} className="game-row">
-                      <span>
+                      <div className="teams">
                         {g.home} vs {g.away}
-                      </span>
+                      </div>
 
-                      {/* Over/Under FIX */}
                       {g.type && (
                         <span
                           className={`ou-badge ${
@@ -202,9 +216,8 @@ export default function User() {
                         </span>
                       )}
 
-                      <span>Odd: {g.odd}</span>
+                      <div className="odd">Odd: {g.odd}</div>
 
-                      {/* Safe result */}
                       <span
                         className={`result-badge result-${
                           g.result
@@ -240,7 +253,6 @@ export default function User() {
           })}
         </div>
 
-        {/* PAGINATION */}
         <div className="pagination">
           <button
             className="btn"
@@ -273,9 +285,9 @@ export default function User() {
 
             {selected.games?.map((g, i) => (
               <div key={i} className="game-row">
-                <span>
+                <div className="teams">
                   {g.home} vs {g.away}
-                </span>
+                </div>
 
                 {g.type && (
                   <span
@@ -289,7 +301,7 @@ export default function User() {
                   </span>
                 )}
 
-                <span>Odd: {g.odd}</span>
+                <div className="odd">Odd: {g.odd}</div>
 
                 <span
                   className={`result-badge result-${
