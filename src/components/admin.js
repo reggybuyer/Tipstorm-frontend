@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API =
-  process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -12,6 +11,7 @@ export default function Admin() {
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+  const [editing, setEditing] = useState(null);
 
   const token = localStorage.getItem("token");
   const limit = 10;
@@ -20,6 +20,8 @@ export default function Admin() {
     const role = localStorage.getItem("role");
     if (role !== "admin") {
       window.location.href = "/admin-login";
+    } else {
+      loadSlips(1);
     }
   }, []);
 
@@ -28,8 +30,7 @@ export default function Admin() {
     window.location.href = "/";
   }
 
-  /* ================= USERS ================= */
-
+  /* USERS */
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -38,8 +39,7 @@ export default function Admin() {
     setUsers(data.users || []);
   }
 
-  /* ================= REQUESTS ================= */
-
+  /* REQUESTS */
   async function loadRequests() {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -61,19 +61,22 @@ export default function Admin() {
     loadRequests();
   }
 
-  /* ================= CREATE SLIP ================= */
+  /* SLIPS */
+  async function loadSlips(newPage = 1) {
+    const res = await fetch(
+      `${API}/slips?page=${newPage}&limit=${limit}`
+    );
+    const data = await res.json();
+
+    setSlips(data.slips || []);
+    setPages(data.pages || 1);
+    setPage(newPage);
+  }
 
   function addGame() {
     setGames([
       ...games,
-      {
-        home: "",
-        away: "",
-        odd: 1,
-        type: "Over",
-        line: "2.5",
-        result: "pending",
-      },
+      { home: "", away: "", odd: 1, type: "Over", line: "2.5", result: "pending" },
     ]);
   }
 
@@ -84,25 +87,7 @@ export default function Admin() {
   }
 
   async function createSlip() {
-    if (!date) {
-      alert("Select date");
-      return;
-    }
-
-    if (games.length === 0) {
-      alert("Add at least one game");
-      return;
-    }
-
-    const totalOdds = games.reduce(
-      (acc, g) => acc * (parseFloat(g.odd) || 1),
-      1
-    );
-
-    if (totalOdds < 2) {
-      alert("Minimum total odds is 2");
-      return;
-    }
+    if (!date || games.length === 0) return;
 
     await fetch(`${API}/slips`, {
       method: "POST",
@@ -110,30 +95,48 @@ export default function Admin() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        date,
-        games,
-        access,
-        totalOdds,
-      }),
+      body: JSON.stringify({ date, games, access }),
     });
 
-    alert("Slip created");
     setGames([]);
     setDate("");
     loadSlips(1);
   }
 
-  /* ================= LOAD SLIPS ================= */
+  /* DELETE SLIP */
+  async function deleteSlip(id) {
+    if (!window.confirm("Delete this slip?")) return;
 
-  async function loadSlips(newPage = 1) {
-    const res = await fetch(
-      `${API}/slips?page=${newPage}&limit=${limit}`
-    );
-    const data = await res.json();
-    setSlips(data.slips || []);
-    setPages(data.pages || 1);
-    setPage(newPage);
+    await fetch(`${API}/slips/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    loadSlips(page);
+  }
+
+  /* EDIT SLIP */
+  function startEdit(slip) {
+    setEditing(slip._id);
+    setDate(slip.date);
+    setAccess(slip.access);
+    setGames(slip.games);
+  }
+
+  async function saveEdit(id) {
+    await fetch(`${API}/slips/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ date, access, games }),
+    });
+
+    setEditing(null);
+    setGames([]);
+    setDate("");
+    loadSlips(page);
   }
 
   async function markResult(slipId, index, result) {
@@ -143,17 +146,11 @@ export default function Admin() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        slipId,
-        gameIndex: index,
-        result,
-      }),
+      body: JSON.stringify({ slipId, gameIndex: index, result }),
     });
 
     loadSlips(page);
   }
-
-  /* ================= RENDER ================= */
 
   return (
     <div className="section">
@@ -168,10 +165,9 @@ export default function Admin() {
       <h3>Total Requests: {requests.length}</h3>
       <h3>Total Slips: {slips.length}</h3>
 
-      {/* ================= CREATE SLIP ================= */}
-
+      {/* CREATE / EDIT SLIP */}
       <div className="card">
-        <h3>Create Slip</h3>
+        <h3>{editing ? "Edit Slip" : "Create Slip"}</h3>
 
         <input
           type="date"
@@ -194,45 +190,31 @@ export default function Admin() {
             <input
               placeholder="Home"
               value={g.home}
-              onChange={(e) =>
-                updateGame(i, "home", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "home", e.target.value)}
             />
-
             <input
               placeholder="Away"
               value={g.away}
-              onChange={(e) =>
-                updateGame(i, "away", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "away", e.target.value)}
             />
-
             <input
               type="number"
               step="0.01"
               placeholder="Odd"
               value={g.odd}
-              onChange={(e) =>
-                updateGame(i, "odd", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "odd", e.target.value)}
             />
-
             <select
               value={g.type}
-              onChange={(e) =>
-                updateGame(i, "type", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "type", e.target.value)}
             >
               <option value="Over">Over</option>
               <option value="Under">Under</option>
             </select>
-
             <input
-              placeholder="Line (e.g 2.5)"
+              placeholder="Line"
               value={g.line}
-              onChange={(e) =>
-                updateGame(i, "line", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "line", e.target.value)}
             />
           </div>
         ))}
@@ -241,19 +223,23 @@ export default function Admin() {
           Add Game
         </button>
 
-        <button className="btn btn-upgrade" onClick={createSlip}>
-          Create Slip
-        </button>
+        {editing ? (
+          <button className="btn btn-upgrade" onClick={() => saveEdit(editing)}>
+            Save Edit
+          </button>
+        ) : (
+          <button className="btn btn-upgrade" onClick={createSlip}>
+            Create Slip
+          </button>
+        )}
       </div>
 
-      {/* ================= USERS ================= */}
-
+      {/* USERS */}
       <div className="card">
         <h3>Users</h3>
         <button className="btn" onClick={loadUsers}>
           Load Users
         </button>
-
         {users.map((u) => (
           <div key={u.email}>
             <strong>{u.email}</strong>
@@ -262,61 +248,43 @@ export default function Admin() {
         ))}
       </div>
 
-      {/* ================= REQUESTS ================= */}
-
+      {/* REQUESTS */}
       <div className="card">
         <h3>Requests</h3>
         <button className="btn" onClick={loadRequests}>
           Load Requests
         </button>
-
         {requests.map((r) => (
           <div key={r._id}>
             <strong>{r.email}</strong>
             <p>Plan: {r.plan}</p>
-
-            <button
-              className="btn btn-view"
-              onClick={() => approve(r._id)}
-            >
+            <button className="btn btn-view" onClick={() => approve(r._id)}>
               Activate
             </button>
           </div>
         ))}
       </div>
 
-      {/* ================= SLIPS ================= */}
-
+      {/* SLIPS */}
       <div className="card">
         <h3>Slips</h3>
-
         <button className="btn" onClick={() => loadSlips(1)}>
           Load Slips
         </button>
 
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
-            <p>
-              {slip.date} — {slip.access?.toUpperCase()}
-            </p>
+            <div className="slip-header">
+              <span>{slip.date}</span>
+              <span className="badge-access">{slip.access}</span>
+            </div>
 
             {slip.games.map((g, i) => (
               <div key={i} className="game-row">
-
-                <span>
-                  {g.home} vs {g.away}
-                </span>
-
-                {/* ✅ Supports old and new format */}
-                <span>
-                  {g.type
-                    ? `${g.type} ${g.line}`
-                    : g.overUnder || ""}
-                </span>
-
+                <span>{g.home} vs {g.away}</span>
+                <span>{g.type ? `${g.type} ${g.line}` : ""}</span>
                 <span>Odd: {g.odd}</span>
 
-                {/* Show current result */}
                 <span
                   className={
                     g.result === "win"
@@ -331,42 +299,36 @@ export default function Admin() {
 
                 <button
                   className="badge-win"
-                  onClick={() =>
-                    markResult(slip._id, i, "win")
-                  }
+                  onClick={() => markResult(slip._id, i, "win")}
                 >
                   Won
                 </button>
-
                 <button
                   className="badge-lost"
-                  onClick={() =>
-                    markResult(slip._id, i, "lost")
-                  }
+                  onClick={() => markResult(slip._id, i, "lost")}
                 >
                   Lost
                 </button>
               </div>
             ))}
+
+            <div className="slip-footer">
+              <button className="btn btn-edit" onClick={() => startEdit(slip)}>
+                Edit
+              </button>
+              <button className="btn btn-delete" onClick={() => deleteSlip(slip._id)}>
+                Delete
+              </button>
+            </div>
           </div>
         ))}
 
         <div className="pagination">
-          <button
-            disabled={page <= 1}
-            onClick={() => loadSlips(page - 1)}
-          >
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
             Previous
           </button>
-
-          <span>
-            Page {page} of {pages}
-          </span>
-
-          <button
-            disabled={page >= pages}
-            onClick={() => loadSlips(page + 1)}
-          >
+          <span>Page {page} of {pages}</span>
+          <button disabled={page >= pages} onClick={() => loadSlips(page + 1)}>
             Next
           </button>
         </div>
