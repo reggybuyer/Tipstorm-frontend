@@ -1,53 +1,49 @@
 /* ============================= */
 /* SLIP CARD */
 /* ============================= */
-
 .slip-card {
   background: #1e1e2f;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  color: #ffffff;
 }
 
 /* ============================= */
 /* HEADER */
 /* ============================= */
-
 .slip-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 /* ============================= */
 /* PLAN BADGES */
 /* ============================= */
-
 .plan-badge {
-  padding: 4px 8px;
-  font-size: 11px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 20px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .plan-free {
-  background: #3b82f6;   /* Blue */
+  background: #2563eb;   /* Blue */
   color: #fff;
 }
 
 .plan-premium {
-  background: #a855f7;   /* Purple */
+  background: #9333ea;   /* Purple */
   color: #fff;
 }
 
 /* ============================= */
 /* GAME ROW */
 /* ============================= */
-
 .game-row {
   display: flex;
   justify-content: space-between;
@@ -55,6 +51,11 @@
   font-size: 13px;
   padding: 6px 0;
   gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.game-row:last-child {
+  border-bottom: none;
 }
 
 .game-row span:first-child {
@@ -72,22 +73,20 @@
 /* ============================= */
 /* RESULT BADGES */
 /* ============================= */
-
 .result-badge {
-  padding: 3px 7px;
-  font-size: 11px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 20px;
   font-weight: 600;
-  flex: 0 0 auto;
 }
 
 .result-won {
-  background: #22c55e;   /* Green */
+  background: #16a34a;   /* Green */
   color: #fff;
 }
 
 .result-lost {
-  background: #ef4444;   /* Red */
+  background: #dc2626;   /* Red */
   color: #fff;
 }
 
@@ -97,12 +96,31 @@
 }
 
 /* ============================= */
+/* OVER / UNDER BADGES */
+/* ============================= */
+.ou-badge {
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.ou-over {
+  background: #0ea5e9;   /* Light Blue */
+  color: #fff;
+}
+
+.ou-under {
+  background: #6b7280;   /* Gray */
+  color: #fff;
+}
+
+/* ============================= */
 /* BUTTONS */
 /* ============================= */
-
 .btn {
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   border: none;
   cursor: pointer;
@@ -110,19 +128,19 @@
   transition: 0.2s ease;
 }
 
-/* View Button */
+/* View Button - Teal */
 .btn-view {
-  background: #2563eb;   /* Blue */
+  background: #0d9488;
   color: #fff;
 }
 
 .btn-view:hover {
-  background: #1d4ed8;
+  background: #0f766e;
 }
 
-/* Upgrade Button */
+/* Upgrade Button - Orange */
 .btn-upgrade {
-  background: #f59e0b;   /* Orange */
+  background: #f59e0b;
   color: #fff;
 }
 
@@ -130,22 +148,21 @@
   background: #d97706;
 }
 
-/* Logout Button */
+/* Logout Button - Dark Red */
 .btn-logout {
-  background: #dc2626;   /* Strong Red */
+  background: #b91c1c;
   color: #fff;
 }
 
 .btn-logout:hover {
-  background: #b91c1c;
+  background: #991b1b;
 }
 
 /* ============================= */
 /* PREMIUM BLUR */
 /* ============================= */
-
 .blur-teams {
-  filter: blur(5px);
+  filter: blur(4px);
   pointer-events: none;
   user-select: none;
 } 
