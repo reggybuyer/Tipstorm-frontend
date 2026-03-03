@@ -1,118 +1,214 @@
 /* ============================= */
-/* SLIP CARD */
+/* GLOBAL */
 /* ============================= */
-.slip-card {
-  background: #1e1e2f;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  color: #ffffff;
+body {
+  background: #f4f6f9;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* ============================= */
-/* HEADER */
-/* ============================= */
-.slip-header {
+.section {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+.header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+}
+
+/* ============================= */
+/* CARD */
+/* ============================= */
+.card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* ============================= */
+/* UPGRADE CARD */
+/* ============================= */
+.upgrade-card {
+  border-left: 5px solid #f59e0b;
+  background: #fffaf0;
+}
+
+.upgrade-card h3 {
+  color: #b45309;
+  margin-bottom: 12px;
+}
+
+.payment-box {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.upgrade-card select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
   margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.amount-display {
+  background: #eef2ff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
 }
 
 /* ============================= */
 /* PLAN BADGES */
 /* ============================= */
 .plan-badge {
-  padding: 3px 8px;
   font-size: 10px;
+  padding: 4px 8px;
   border-radius: 20px;
-  font-weight: 600;
+  font-weight: bold;
   text-transform: uppercase;
 }
 
 .plan-free {
-  background: #2563eb;   /* Blue */
+  background: #3b82f6;
+  color: #fff;
+}
+
+.plan-weekly {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.plan-monthly {
+  background: #10b981;
+  color: #fff;
+}
+
+.plan-vip {
+  background: #9333ea;
   color: #fff;
 }
 
 .plan-premium {
-  background: #9333ea;   /* Purple */
+  background: #9333ea;
   color: #fff;
+}
+
+/* ============================= */
+/* GRID */
+/* ============================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ============================= */
+/* SLIP CARD */
+/* ============================= */
+.slip-card {
+  background: #1e1e2f;
+  color: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* ============================= */
 /* GAME ROW */
 /* ============================= */
 .game-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
   align-items: center;
   font-size: 13px;
-  padding: 6px 0;
-  gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.game-row:last-child {
-  border-bottom: none;
-}
-
-.game-row span:first-child {
-  flex: 1;
+.teams {
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.game-row span:nth-child(2) {
-  min-width: 60px;
-  text-align: right;
+.odd {
+  font-weight: bold;
 }
 
 /* ============================= */
 /* RESULT BADGES */
 /* ============================= */
 .result-badge {
-  padding: 3px 8px;
   font-size: 10px;
+  padding: 3px 8px;
   border-radius: 20px;
-  font-weight: 600;
+  font-weight: bold;
 }
 
 .result-won {
-  background: #16a34a;   /* Green */
-  color: #fff;
+  background: #16a34a;
+  color: white;
 }
 
 .result-lost {
-  background: #dc2626;   /* Red */
-  color: #fff;
+  background: #dc2626;
+  color: white;
 }
 
 .result-pending {
-  background: #facc15;   /* Yellow */
-  color: #000;
+  background: #facc15;
+  color: black;
 }
 
 /* ============================= */
-/* OVER / UNDER BADGES */
+/* OVER / UNDER */
 /* ============================= */
 .ou-badge {
-  padding: 2px 8px;
   font-size: 10px;
+  padding: 3px 8px;
   border-radius: 20px;
-  font-weight: 600;
+  font-weight: bold;
 }
 
 .ou-over {
-  background: #0ea5e9;   /* Light Blue */
-  color: #fff;
+  background: #0ea5e9;
+  color: white;
 }
 
 .ou-under {
-  background: #6b7280;   /* Gray */
-  color: #fff;
+  background: #6b7280;
+  color: white;
+}
+
+/* ============================= */
+/* FOOTER */
+/* ============================= */
+.slip-footer {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-top: 5px;
 }
 
 /* ============================= */
@@ -121,37 +217,33 @@
 .btn {
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 12px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: bold;
   transition: 0.2s ease;
 }
 
-/* View Button - Teal */
 .btn-view {
   background: #0d9488;
-  color: #fff;
+  color: white;
 }
 
 .btn-view:hover {
   background: #0f766e;
 }
 
-/* Upgrade Button - Orange */
 .btn-upgrade {
   background: #f59e0b;
-  color: #fff;
+  color: white;
 }
 
 .btn-upgrade:hover {
   background: #d97706;
 }
 
-/* Logout Button - Dark Red */
 .btn-logout {
   background: #b91c1c;
-  color: #fff;
+  color: white;
 }
 
 .btn-logout:hover {
@@ -159,10 +251,55 @@
 }
 
 /* ============================= */
-/* PREMIUM BLUR */
+/* BLUR */
 /* ============================= */
 .blur-teams {
   filter: blur(4px);
   pointer-events: none;
-  user-select: none;
+}
+
+/* LOCK MESSAGE */
+.lock-overlay {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #f87171;
+  font-weight: bold;
+}
+
+/* ============================= */
+/* PAGINATION */
+/* ============================= */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+/* ============================= */
+/* MODAL */
+/* ============================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.close {
+  float: right;
+  cursor: pointer;
+  font-size: 18px;
+  border: none;
+  background: none;
 } 
