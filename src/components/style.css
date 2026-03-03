@@ -2,7 +2,7 @@
 
 .section {
   padding: 20px;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: auto;
   font-family: Arial, sans-serif;
 }
@@ -61,58 +61,51 @@
   color: white;
 }
 
-/* Different colors */
-
-.plan-free {
-  background: #6b7280;
-}
-
-.plan-weekly {
-  background: #3b82f6;
-}
-
-.plan-monthly {
-  background: #8b5cf6;
-}
-
-.plan-vip {
-  background: #f59e0b;
-}
-
-.plan-premium {
-  background: #10b981;
-}
+.plan-free { background: #6b7280; }
+.plan-weekly { background: #3b82f6; }
+.plan-monthly { background: #8b5cf6; }
+.plan-vip { background: #f59e0b; }
+.plan-premium { background: #10b981; }
 
 /* ================= RESULT BADGES ================= */
 
-.result-badge {
-  padding: 4px 10px;
+.badge-win {
+  background: #16a34a;
+  color: white;
+  padding: 5px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
-  color: white;
+  border: none;
+  cursor: pointer;
 }
 
-.result-win {
-  background: #16a34a;
-}
-
-.result-lost {
+.badge-lost {
   background: #dc2626;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
 }
 
-.result-pending {
+.badge-pending {
   background: #6b7280;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
 }
 
 /* ================= OVER UNDER ================= */
 
 .ou-badge {
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   color: white;
+  display: inline-block;
 }
 
 .ou-over {
@@ -125,9 +118,10 @@
 
 /* ================= GAME ROW ================= */
 
+/* Updated grid for Admin */
 .game-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
   gap: 10px;
   padding: 8px 0;
   border-bottom: 1px solid #f1f1f1;
@@ -144,42 +138,16 @@
 
 /* ================= SLIPS ================= */
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 15px;
-}
-
 .slip-card {
   background: #f9fafb;
   padding: 15px;
   border-radius: 10px;
-  position: relative;
+  margin-bottom: 15px;
 }
 
-.slip-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.slip-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+.slip-card p {
   font-weight: bold;
-}
-
-.blur-teams {
-  filter: blur(4px);
-}
-
-.lock-overlay {
-  margin-top: 10px;
-  padding: 6px;
-  background: #fef3c7;
-  border-radius: 6px;
-  font-size: 13px;
+  margin-bottom: 8px;
 }
 
 /* ================= PAGINATION ================= */
@@ -191,34 +159,17 @@
   margin-top: 15px;
 }
 
-/* ================= MODAL ================= */
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 600px;
-}
-
-.close {
-  float: right;
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 6px;
   border: none;
-  background: none;
-  font-size: 20px;
   cursor: pointer;
+  background: #e5e7eb;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ================= UPGRADE SECTION ================= */
@@ -233,4 +184,18 @@
 
 .amount-display {
   margin: 10px 0;
+  font-weight: bold;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .game-row {
+    grid-template-columns: 1fr;
+  }
+
+  .header-row {
+    flex-direction: column;
+    gap: 10px;
+  }
 } 
