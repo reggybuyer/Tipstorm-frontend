@@ -8,7 +8,6 @@ export default function Admin() {
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-
   const [games, setGames] = useState([{ home: "", away: "", odd: "", type: "Over", line: "" }]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
@@ -66,16 +65,21 @@ export default function Admin() {
 
   async function createSlip() {
     try {
+      if (!games.length) {
+        alert("Add at least one game");
+        return;
+      }
+
       const body = {
         date,
         access,
-        games: games.map(g => ({
+        games: games.map((g) => ({
           home: g.home,
           away: g.away,
           odd: parseFloat(g.odd),
           type: g.type,
-          line: g.line
-        }))
+          line: g.line,
+        })),
       };
 
       const res = await fetch(`${API}/slips`, {
