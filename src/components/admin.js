@@ -8,10 +8,9 @@ export default function Admin() {
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [games, setGames] = useState([{ home: "", away: "", odd: "", type: "Over", line: "" }]);
+  const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
-  const [editSlip, setEditSlip] = useState(null);
   const token = localStorage.getItem("token");
   const limit = 10;
 
@@ -20,11 +19,6 @@ export default function Admin() {
     if (role !== "admin") window.location.href = "/admin-login";
     loadSlips(1);
   }, []);
-
-  function logout() {
-    localStorage.clear();
-    window.location.href = "/";
-  }
 
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
@@ -63,19 +57,24 @@ export default function Admin() {
   }
 
   async function createSlip() {
-    try {
-      const body = {
-        date,
-        access,
-        games: games.map(g => ({
-          home: g.home,
-          away: g.away,
-          odd: parseFloat(g.odd) || 0,
-          type: g.type,
-          line: g.line || ""
-        }))
-      };
+    if (!games.length) {
+      alert("Add at least one game");
+      return;
+    }
 
+    const body = {
+      date,
+      access,
+      games: games.map(g => ({
+        home: g.home,
+        away: g.away,
+        odd: parseFloat(g.odd) || 0,
+        type: g.type,
+        line: g.line || ""
+      }))
+    };
+
+    try {
       const res = await fetch(`${API}/slips`, {
         method: "POST",
         headers: {
@@ -88,7 +87,7 @@ export default function Admin() {
       const data = await res.json();
       if (data.success) {
         alert("Slip created");
-        setGames([{ home: "", away: "", odd: "", type: "Over", line: "" }]);
+        setGames([]);
         setDate("");
         loadSlips(page);
       } else {
@@ -96,7 +95,7 @@ export default function Admin() {
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to create slip");
+      alert("Server error");
     }
   }
 
@@ -106,44 +105,6 @@ export default function Admin() {
     setSlips(data.slips || []);
     setPages(data.pages || 1);
     setPage(newPage);
-  }
-
-  function openEdit(slip) {
-    setEditSlip({ ...slip, games: slip.games || [] });
-  }
-
-  function closeEdit() {
-    setEditSlip(null);
-  }
-
-  function updateEditGame(index, field, value) {
-    const updated = [...editSlip.games];
-    updated[index][field] = value;
-    setEditSlip({ ...editSlip, games: updated });
-  }
-
-  async function saveEdit() {
-    await fetch(`${API}/slips/${editSlip._id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(editSlip),
-    });
-    alert("Slip updated");
-    closeEdit();
-    loadSlips(page);
-  }
-
-  async function deleteSlip(id) {
-    if (!window.confirm("Delete slip?")) return;
-    await fetch(`${API}/slips/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    alert("Slip deleted");
-    loadSlips(page);
   }
 
   async function markResult(slipId, index, result) {
@@ -162,7 +123,9 @@ export default function Admin() {
     <div className="section">
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={() => { localStorage.clear(); window.location.href = "/"; }}>
+          Logout
+        </button>
       </div>
 
       <div className="card">
@@ -183,9 +146,7 @@ export default function Admin() {
           <div key={r._id}>
             <strong>{r.email}</strong>
             <p>Plan: {r.plan}</p>
-            <button className="btn btn-view" onClick={() => approve(r._id)}>
-              Activate
-            </button>
+            <button className="btn btn-view" onClick={() => approve(r._id)}>Activate</button>
           </div>
         ))}
       </div>
@@ -193,6 +154,7 @@ export default function Admin() {
       <div className="card">
         <h3>Create Slip</h3>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+
         <select value={access} onChange={(e) => setAccess(e.target.value)}>
           <option value="free">Free</option>
           <option value="weekly">Weekly</option>
@@ -253,11 +215,6 @@ export default function Admin() {
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
               </div>
             ))}
-
-            <div className="slip-footer">
-              <button onClick={() => openEdit(slip)}>Edit</button>
-              <button onClick={() => deleteSlip(slip._id)}>Delete</button>
-            </div>
           </div>
         ))}
 
@@ -267,34 +224,6 @@ export default function Admin() {
           <button onClick={() => loadSlips(page + 1)}>Next</button>
         </div>
       </div>
-
-      {editSlip && (
-        <div className="modal">
-          <div className="modal-content">
-            <button className="close" onClick={closeEdit}>×</button>
-            <h3>Edit Slip</h3>
-
-            {editSlip.games?.length > 0 ? (
-              editSlip.games.map((g, i) => (
-                <div key={i} className="game-row">
-                  <input value={g.home} onChange={(e) => updateEditGame(i, "home", e.target.value)} />
-                  <input value={g.away} onChange={(e) => updateEditGame(i, "away", e.target.value)} />
-                  <input type="number" value={g.odd} onChange={(e) => updateEditGame(i, "odd", e.target.value)} />
-                  <select value={g.type} onChange={(e) => updateEditGame(i, "type", e.target.value)}>
-                    <option value="Over">Over</option>
-                    <option value="Under">Under</option>
-                  </select>
-                  <input value={g.line} onChange={(e) => updateEditGame(i, "line", e.target.value)} />
-                </div>
-              ))
-            ) : (
-              <p>No games in this slip.</p>
-            )}
-
-            <button className="btn btn-upgrade" onClick={saveEdit}>Save</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 
