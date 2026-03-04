@@ -48,7 +48,10 @@ export default function User() {
 
   function getRemainingDays() {
     if (!user?.expiresAt) return 0;
-    return Math.max(0, Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000));
+    return Math.max(
+      0,
+      Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000)
+    );
   }
 
   function getAmount() {
@@ -95,19 +98,33 @@ export default function User() {
     <div className="section">
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       <div className="card premium-card">
-        <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
-        <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
+        <span className={`plan-badge plan-${user.plan}`}>
+          {user.plan.toUpperCase()} PLAN
+        </span>
+        <p>
+          Expires:{" "}
+          {user.expiresAt
+            ? new Date(user.expiresAt).toDateString()
+            : "No expiry"}
+        </p>
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-            <p>You are on {user.plan.toUpperCase()}. Upgrade for more access.</p>
-            <select value={planSelect} onChange={(e) => setPlanSelect(e.target.value)}>
+            <p>You are on {user.plan.toUpperCase()}.</p>
+
+            <select
+              value={planSelect}
+              onChange={(e) => setPlanSelect(e.target.value)}
+            >
+              <option value="weekly">Weekly - Ksh 500</option>
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
@@ -130,23 +147,48 @@ export default function User() {
 
         <div className="grid">
           {slips.map((slip) => {
-            const allowed = slip.access === "free" || (user.premium && (user.plan === "vip" || user.plan === slip.access));
-            const totalOdds = slip.games?.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1);
+            const allowed =
+              slip.access === "free" ||
+              (user.premium &&
+                (user.plan === "vip" || user.plan === slip.access));
+
+            const totalOdds = slip.games?.reduce(
+              (acc, g) => acc * (parseFloat(g.odd) || 1),
+              1
+            );
 
             return (
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
                   <strong>{slip.date}</strong>
-                  <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>
+                  <span className={`plan-badge plan-${slip.access}`}>
+                    {slip.access.toUpperCase()}
+                  </span>
                 </div>
 
                 <div className={allowed ? "" : "blur-teams"}>
                   {slip.games?.map((g, i) => (
                     <div key={i} className="game-row">
-                      <div className="teams">{g.home} vs {g.away}</div>
-                      <span className={g.type === "Over" ? "ou-over" : "ou-under"}>{g.type} {g.line}</span>
+                      <div className="teams">
+                        {g.home} vs {g.away}
+                      </div>
+                      {g.type && (
+                        <span
+                          className={`ou-badge ${
+                            g.type === "Over" ? "ou-over" : "ou-under"
+                          }`}
+                        >
+                          {g.type} {g.line}
+                        </span>
+                      )}
                       <div className="odd">Odd: {g.odd}</div>
-                      <span className={`result-badge result-${g.result || "pending"}`}>{g.result || "pending"}</span>
+                      <span
+                        className={`result-badge result-${
+                          g.result || "pending"
+                        }`}
+                      >
+                        {g.result || "Pending"}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -156,13 +198,37 @@ export default function User() {
                 </div>
 
                 {allowed ? (
-                  <button className="btn btn-view" onClick={() => openSlip(slip)}>View Full Slip</button>
+                  <button
+                    className="btn btn-view"
+                    onClick={() => openSlip(slip)}
+                  >
+                    View Full Slip
+                  </button>
                 ) : (
-                  <div className="lock-overlay">Premium slip — upgrade to view</div>
+                  <div className="lock-overlay">
+                    Premium slip — upgrade to view
+                  </div>
                 )}
               </div>
             );
           })}
+        </div>
+
+        <div className="pagination">
+          <button
+            className="btn"
+            onClick={() => loadSlips(page - 1)}
+            disabled={page <= 1}
+          >
+            Previous
+          </button>
+          <span>Page {page}</span>
+          <button
+            className="btn"
+            onClick={() => loadSlips(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
 
@@ -173,13 +239,19 @@ export default function User() {
             <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
 
-            {selected.games.length > 0 ? (
+            {selected.games && selected.games.length > 0 ? (
               selected.games.map((g, i) => (
                 <div key={i} className="game-row">
                   <div className="teams">{g.home} vs {g.away}</div>
-                  <span className={g.type === "Over" ? "ou-over" : "ou-under"}>{g.type} {g.line}</span>
+                  <span className={`ou-badge ${
+                    g.type === "Over" ? "ou-over" : "ou-under"
+                  }`}>
+                    {g.type} {g.line}
+                  </span>
                   <div className="odd">Odd: {g.odd}</div>
-                  <span className={`result-badge result-${g.result || "pending"}`}>{g.result || "pending"}</span>
+                  <span className={`result-badge result-${g.result || "pending"}`}>
+                    {g.result || "pending"}
+                  </span>
                 </div>
               ))
             ) : (
