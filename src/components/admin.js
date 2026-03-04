@@ -12,7 +12,6 @@ export default function Admin() {
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
   const [editSlip, setEditSlip] = useState(null);
-
   const token = localStorage.getItem("token");
   const limit = 10;
 
@@ -65,21 +64,16 @@ export default function Admin() {
 
   async function createSlip() {
     try {
-      if (!games.length) {
-        alert("Add at least one game");
-        return;
-      }
-
       const body = {
         date,
         access,
-        games: games.map((g) => ({
+        games: games.map(g => ({
           home: g.home,
           away: g.away,
           odd: parseFloat(g.odd),
           type: g.type,
-          line: g.line,
-        })),
+          line: g.line
+        }))
       };
 
       const res = await fetch(`${API}/slips`, {
@@ -208,14 +202,31 @@ export default function Admin() {
 
         {games.map((g, i) => (
           <div key={i} className="game-row">
-            <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
-            <input placeholder="Away" value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} />
-            <input type="number" placeholder="Odd" value={g.odd} onChange={(e) => updateGame(i, "odd", e.target.value)} />
+            <input
+              placeholder="Home"
+              value={g.home}
+              onChange={(e) => updateGame(i, "home", e.target.value)}
+            />
+            <input
+              placeholder="Away"
+              value={g.away}
+              onChange={(e) => updateGame(i, "away", e.target.value)}
+            />
+            <input
+              placeholder="Odd"
+              type="number"
+              value={g.odd}
+              onChange={(e) => updateGame(i, "odd", e.target.value)}
+            />
             <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
               <option value="Over">Over</option>
               <option value="Under">Under</option>
             </select>
-            <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
+            <input
+              placeholder="Line"
+              value={g.line}
+              onChange={(e) => updateGame(i, "line", e.target.value)}
+            />
           </div>
         ))}
 
@@ -266,14 +277,30 @@ export default function Admin() {
             {editSlip.games?.length > 0 ? (
               editSlip.games.map((g, i) => (
                 <div key={i} className="game-row">
-                  <input value={g.home} onChange={(e) => updateEditGame(i, "home", e.target.value)} />
-                  <input value={g.away} onChange={(e) => updateEditGame(i, "away", e.target.value)} />
-                  <input type="number" value={g.odd} onChange={(e) => updateEditGame(i, "odd", e.target.value)} />
-                  <select value={g.type} onChange={(e) => updateEditGame(i, "type", e.target.value)}>
+                  <input
+                    value={g.home}
+                    onChange={(e) => updateEditGame(i, "home", e.target.value)}
+                  />
+                  <input
+                    value={g.away}
+                    onChange={(e) => updateEditGame(i, "away", e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    value={g.odd}
+                    onChange={(e) => updateEditGame(i, "odd", e.target.value)}
+                  />
+                  <select
+                    value={g.type}
+                    onChange={(e) => updateEditGame(i, "type", e.target.value)}
+                  >
                     <option value="Over">Over</option>
                     <option value="Under">Under</option>
                   </select>
-                  <input value={g.line} onChange={(e) => updateEditGame(i, "line", e.target.value)} />
+                  <input
+                    value={g.line}
+                    onChange={(e) => updateEditGame(i, "line", e.target.value)}
+                  />
                 </div>
               ))
             ) : (
