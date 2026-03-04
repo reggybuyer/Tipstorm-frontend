@@ -30,7 +30,6 @@ export default function Admin() {
     window.location.href = "/";
   }
 
-  /* USERS */
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -39,7 +38,6 @@ export default function Admin() {
     setUsers(data.users || []);
   }
 
-  /* REQUESTS */
   async function loadRequests() {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -51,10 +49,7 @@ export default function Admin() {
   async function approve(id) {
     await fetch(`${API}/approve-request`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ requestId: id }),
     });
     alert("User activated");
@@ -77,10 +72,7 @@ export default function Admin() {
 
     const res = await fetch(`${API}/slips`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
 
@@ -91,7 +83,7 @@ export default function Admin() {
       setDate("");
       loadSlips(page);
     } else {
-      alert("Failed to create slip (total odds must be >= 2)");
+      alert("Failed (total odds must be >= 2)");
     }
   }
 
@@ -105,7 +97,10 @@ export default function Admin() {
   }
 
   function openEdit(slip) {
-    setEditSlip({ ...slip, games: slip.games || [] });
+    setEditSlip({
+      ...slip,
+      games: slip.games || [], // <-- ensure array
+    });
   }
 
   function closeEdit() {
@@ -121,10 +116,7 @@ export default function Admin() {
   async function saveEdit() {
     await fetch(`${API}/slips/${editSlip._id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(editSlip),
     });
     alert("Slip updated");
@@ -133,7 +125,7 @@ export default function Admin() {
   }
 
   async function deleteSlip(id) {
-    if (!window.confirm("Delete this slip?")) return;
+    if (!window.confirm("Delete slip?")) return;
     await fetch(`${API}/slips/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
@@ -145,10 +137,7 @@ export default function Admin() {
   async function markResult(slipId, index, result) {
     await fetch(`${API}/slip-result`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ slipId, gameIndex: index, result }),
     });
     loadSlips(page);
@@ -193,11 +182,7 @@ export default function Admin() {
       {/* CREATE SLIP */}
       <div className="card">
         <h3>Create Slip</h3>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         <select value={access} onChange={(e) => setAccess(e.target.value)}>
           <option value="free">Free</option>
           <option value="weekly">Weekly</option>
@@ -262,12 +247,8 @@ export default function Admin() {
                 <span>{g.type} {g.line}</span>
                 <span>Odd: {g.odd}</span>
                 <span>{g.result || "pending"}</span>
-                <button onClick={() => markResult(slip._id, i, "win")}>
-                  Won
-                </button>
-                <button onClick={() => markResult(slip._id, i, "lost")}>
-                  Lost
-                </button>
+                <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
+                <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
               </div>
             ))}
 
@@ -294,34 +275,38 @@ export default function Admin() {
             <button className="close" onClick={closeEdit}>×</button>
             <h3>Edit Slip</h3>
 
-            {editSlip.games.map((g, i) => (
-              <div key={i} className="game-row">
-                <input
-                  value={g.home}
-                  onChange={(e) => updateEditGame(i, "home", e.target.value)}
-                />
-                <input
-                  value={g.away}
-                  onChange={(e) => updateEditGame(i, "away", e.target.value)}
-                />
-                <input
-                  type="number"
-                  value={g.odd}
-                  onChange={(e) => updateEditGame(i, "odd", e.target.value)}
-                />
-                <select
-                  value={g.type}
-                  onChange={(e) => updateEditGame(i, "type", e.target.value)}
-                >
-                  <option value="Over">Over</option>
-                  <option value="Under">Under</option>
-                </select>
-                <input
-                  value={g.line}
-                  onChange={(e) => updateEditGame(i, "line", e.target.value)}
-                />
-              </div>
-            ))}
+            {editSlip.games.length > 0 ? (
+              editSlip.games.map((g, i) => (
+                <div key={i} className="game-row">
+                  <input
+                    value={g.home}
+                    onChange={(e) => updateEditGame(i, "home", e.target.value)}
+                  />
+                  <input
+                    value={g.away}
+                    onChange={(e) => updateEditGame(i, "away", e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    value={g.odd}
+                    onChange={(e) => updateEditGame(i, "odd", e.target.value)}
+                  />
+                  <select
+                    value={g.type}
+                    onChange={(e) => updateEditGame(i, "type", e.target.value)}
+                  >
+                    <option value="Over">Over</option>
+                    <option value="Under">Under</option>
+                  </select>
+                  <input
+                    value={g.line}
+                    onChange={(e) => updateEditGame(i, "line", e.target.value)}
+                  />
+                </div>
+              ))
+            ) : (
+              <p>No games in this slip.</p>
+            )}
 
             <button className="btn btn-upgrade" onClick={saveEdit}>
               Save
