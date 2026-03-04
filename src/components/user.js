@@ -48,8 +48,7 @@ export default function User() {
 
   function getRemainingDays() {
     if (!user?.expiresAt) return 0;
-    const diff = new Date(user.expiresAt) - new Date();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    return Math.max(0, Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000));
   }
 
   function getAmount() {
@@ -60,29 +59,20 @@ export default function User() {
   }
 
   async function requestActivation() {
-    try {
-      await fetch(`${API}/request-subscription`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email,
-          plan: planSelect,
-          message: "User requested manual activation",
-        }),
-      });
-      alert(
-        "Payment request sent. After payment, forward confirmation message and email to WhatsApp 0789906001."
-      );
-    } catch {
-      alert("Request failed.");
-    }
+    await fetch(`${API}/request-subscription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: user.email,
+        plan: planSelect,
+        message: "User requested upgrade",
+      }),
+    });
+    alert("Request sent. Forward payment message to WhatsApp.");
   }
 
   function openSlip(slip) {
-    setSelected({
-      ...slip,
-      games: slip.games || [],
-    });
+    setSelected({ ...slip, games: slip.games || [] });
   }
 
   function closeSlip() {
@@ -105,206 +95,91 @@ export default function User() {
     <div className="section">
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>
-          Logout
-        </button>
+        <button className="btn btn-logout" onClick={logout}>Logout</button>
       </div>
 
-      {/* PREMIUM BLOCK WITH UPGRADE */}
-      {user.premium ? (
-        <div className="card premium-card">
-          <span className={`plan-badge plan-${user.plan}`}>
-            {user.plan.toUpperCase()} PLAN
-          </span>
-          <p>
-            Expires: <strong>{new Date(user.expiresAt).toDateString()}</strong>
-          </p>
-          <p>
-            Remaining: <strong>{getRemainingDays()} days</strong>
-          </p>
+      <div className="card premium-card">
+        <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
+        <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
+        <p>Remaining: {getRemainingDays()} days</p>
 
-          {user.plan !== "vip" && (
-            <div className="upgrade-card">
-              <h4>Upgrade your plan</h4>
-              <p>
-                You are on <strong>{user.plan.toUpperCase()}</strong>. Upgrade for more access.
-              </p>
+        {user.plan !== "vip" && (
+          <div className="upgrade-card">
+            <h4>Upgrade your plan</h4>
+            <p>You are on {user.plan.toUpperCase()}. Upgrade for more access.</p>
+            <select value={planSelect} onChange={(e) => setPlanSelect(e.target.value)}>
+              <option value="monthly">Monthly - Ksh 1000</option>
+              <option value="vip">VIP - Ksh 1500</option>
+            </select>
 
-              <select
-                value={planSelect}
-                onChange={(e) => setPlanSelect(e.target.value)}
-              >
-                {user.plan === "weekly" && (
-                  <option value="monthly">Monthly - Ksh 1000</option>
-                )}
-                <option value="vip">VIP - Ksh 1500</option>
-              </select>
-
-              <div className="amount-display">
-                Amount: <strong>Ksh {getAmount()}</strong>
-              </div>
-
-              <button className="btn btn-upgrade" onClick={requestActivation}>
-                Request Upgrade
-              </button>
+            <div className="amount-display">
+              Amount: <strong>Ksh {getAmount()}</strong>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="card upgrade-card">
-          <h3>Upgrade Plan</h3>
-          <div className="payment-box">
-            <p><strong>Step 1:</strong> Pay via M-Pesa</p>
-            <p><strong>Paybill:</strong> 625625</p>
-            <p><strong>Account:</strong> 20170457</p>
+
+            <button className="btn btn-upgrade" onClick={requestActivation}>
+              Request Upgrade
+            </button>
           </div>
-          <div className="payment-box">
-            <p><strong>Step 2:</strong> After payment</p>
-            <p>Forward confirmation to:</p>
-            <p><strong>WhatsApp: 0789906001</strong></p>
-            <p>OR</p>
-            <p>Email: <strong>support@tipstorm.com</strong></p>
-          </div>
+        )}
+      </div>
 
-          <select
-            value={planSelect}
-            onChange={(e) => setPlanSelect(e.target.value)}
-          >
-            <option value="weekly">Weekly - Ksh 500</option>
-            <option value="monthly">Monthly - Ksh 1000</option>
-            <option value="vip">VIP - Ksh 1500</option>
-          </select>
-
-          <div className="amount-display">
-            Amount: <strong>Ksh {getAmount()}</strong>
-          </div>
-
-          <button className="btn btn-upgrade" onClick={requestActivation}>
-            Request Activation
-          </button>
-        </div>
-      )}
-
-      {/* SLIPS LIST */}
+      {/* SLIPS */}
       <div className="card">
         <h3>Available Slips</h3>
         {slips.length === 0 && <p>No slips available</p>}
 
         <div className="grid">
           {slips.map((slip) => {
-            const allowed =
-              slip.access === "free" ||
-              (user.premium &&
-                (user.plan === "vip" || user.plan === slip.access));
-
-            const totalOdds = slip.games?.reduce(
-              (acc, g) => acc * (parseFloat(g.odd) || 1),
-              1
-            );
+            const allowed = slip.access === "free" || (user.premium && (user.plan === "vip" || user.plan === slip.access));
+            const totalOdds = slip.games?.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1);
 
             return (
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
                   <strong>{slip.date}</strong>
-                  <span className={`plan-badge plan-${slip.access}`}>
-                    {slip.access.toUpperCase()}
-                  </span>
+                  <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>
                 </div>
 
                 <div className={allowed ? "" : "blur-teams"}>
                   {slip.games?.map((g, i) => (
                     <div key={i} className="game-row">
-                      <div className="teams">
-                        {g.home} vs {g.away}
-                      </div>
-                      {g.type && (
-                        <span
-                          className={`ou-badge ${
-                            g.type === "Over" ? "ou-over" : "ou-under"
-                          }`}
-                        >
-                          {g.type} {g.line}
-                        </span>
-                      )}
+                      <div className="teams">{g.home} vs {g.away}</div>
+                      <span className={g.type === "Over" ? "ou-over" : "ou-under"}>{g.type} {g.line}</span>
                       <div className="odd">Odd: {g.odd}</div>
-                      <span
-                        className={`result-badge result-${
-                          g.result ? g.result.toLowerCase() : "pending"
-                        }`}
-                      >
-                        {g.result || "Pending"}
-                      </span>
+                      <span className={`result-badge result-${g.result || "pending"}`}>{g.result || "pending"}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="slip-footer">
-                  <span>Total Odds:</span>
-                  <strong>{totalOdds?.toFixed(2)}</strong>
+                  <strong>Total Odds: {totalOdds?.toFixed(2)}</strong>
                 </div>
 
                 {allowed ? (
-                  <button
-                    className="btn btn-view"
-                    onClick={() => openSlip(slip)}
-                  >
-                    View Full Slip
-                  </button>
+                  <button className="btn btn-view" onClick={() => openSlip(slip)}>View Full Slip</button>
                 ) : (
-                  <div className="lock-overlay">
-                    Premium slip — upgrade to view
-                  </div>
+                  <div className="lock-overlay">Premium slip — upgrade to view</div>
                 )}
               </div>
             );
           })}
         </div>
-
-        <div className="pagination">
-          <button
-            className="btn"
-            onClick={() => loadSlips(page - 1)}
-            disabled={page <= 1}
-          >
-            Previous
-          </button>
-          <span>Page {page}</span>
-          <button className="btn" onClick={() => loadSlips(page + 1)}>
-            Next
-          </button>
-        </div>
       </div>
 
-      {/* MODAL - FULL SLIP */}
+      {/* FULL SLIP MODAL */}
       {selected && (
         <div className="modal">
           <div className="modal-content">
             <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
 
-            {selected.games && selected.games.length > 0 ? (
+            {selected.games.length > 0 ? (
               selected.games.map((g, i) => (
                 <div key={i} className="game-row">
-                  <div className="teams">
-                    {g.home} vs {g.away}
-                  </div>
-                  {g.type && (
-                    <span
-                      className={`ou-badge ${
-                        g.type === "Over" ? "ou-over" : "ou-under"
-                      }`}
-                    >
-                      {g.type} {g.line}
-                    </span>
-                  )}
+                  <div className="teams">{g.home} vs {g.away}</div>
+                  <span className={g.type === "Over" ? "ou-over" : "ou-under"}>{g.type} {g.line}</span>
                   <div className="odd">Odd: {g.odd}</div>
-                  <span
-                    className={`result-badge result-${
-                      g.result ? g.result.toLowerCase() : "pending"
-                    }`}
-                  >
-                    {g.result || "Pending"}
-                  </span>
+                  <span className={`result-badge result-${g.result || "pending"}`}>{g.result || "pending"}</span>
                 </div>
               ))
             ) : (
