@@ -4,9 +4,6 @@ const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
-  const [games, setGames] = useState([]);
-  const [date, setDate] = useState("");
-  const [access, setAccess] = useState("free");
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
