@@ -56,7 +56,6 @@ export default function Admin() {
     loadRequests();
   }
 
-  /* CREATE SLIP */
   function addGameRow() {
     setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
   }
@@ -72,7 +71,10 @@ export default function Admin() {
 
     const res = await fetch(`${API}/slips`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
     });
 
@@ -87,7 +89,6 @@ export default function Admin() {
     }
   }
 
-  /* SLIPS */
   async function loadSlips(newPage = 1) {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
     const data = await res.json();
@@ -97,10 +98,7 @@ export default function Admin() {
   }
 
   function openEdit(slip) {
-    setEditSlip({
-      ...slip,
-      games: slip.games || [], // <-- ensure array
-    });
+    setEditSlip({ ...slip, games: slip.games || [] });
   }
 
   function closeEdit() {
@@ -116,7 +114,10 @@ export default function Admin() {
   async function saveEdit() {
     await fetch(`${API}/slips/${editSlip._id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(editSlip),
     });
     alert("Slip updated");
@@ -137,7 +138,10 @@ export default function Admin() {
   async function markResult(slipId, index, result) {
     await fetch(`${API}/slip-result`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ slipId, gameIndex: index, result }),
     });
     loadSlips(page);
@@ -275,7 +279,7 @@ export default function Admin() {
             <button className="close" onClick={closeEdit}>×</button>
             <h3>Edit Slip</h3>
 
-            {editSlip.games.length > 0 ? (
+            {editSlip.games && editSlip.games.length > 0 ? (
               editSlip.games.map((g, i) => (
                 <div key={i} className="game-row">
                   <input
