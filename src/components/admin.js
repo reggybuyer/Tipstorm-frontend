@@ -70,7 +70,7 @@ export default function Admin() {
         games: games.map(g => ({
           home: g.home,
           away: g.away,
-          odd: parseFloat(g.odd),
+          odd: parseFloat(g.odd), || 0
           type: g.type,
           line: g.line
         }))
