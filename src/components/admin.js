@@ -70,9 +70,9 @@ export default function Admin() {
         games: games.map(g => ({
           home: g.home,
           away: g.away,
-          odd: parseFloat(g.odd), || 0
+          odd: parseFloat(g.odd) || 0,
           type: g.type,
-          line: g.line
+          line: g.line || ""
         }))
       };
 
@@ -277,30 +277,14 @@ export default function Admin() {
             {editSlip.games?.length > 0 ? (
               editSlip.games.map((g, i) => (
                 <div key={i} className="game-row">
-                  <input
-                    value={g.home}
-                    onChange={(e) => updateEditGame(i, "home", e.target.value)}
-                  />
-                  <input
-                    value={g.away}
-                    onChange={(e) => updateEditGame(i, "away", e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    value={g.odd}
-                    onChange={(e) => updateEditGame(i, "odd", e.target.value)}
-                  />
-                  <select
-                    value={g.type}
-                    onChange={(e) => updateEditGame(i, "type", e.target.value)}
-                  >
+                  <input value={g.home} onChange={(e) => updateEditGame(i, "home", e.target.value)} />
+                  <input value={g.away} onChange={(e) => updateEditGame(i, "away", e.target.value)} />
+                  <input type="number" value={g.odd} onChange={(e) => updateEditGame(i, "odd", e.target.value)} />
+                  <select value={g.type} onChange={(e) => updateEditGame(i, "type", e.target.value)}>
                     <option value="Over">Over</option>
                     <option value="Under">Under</option>
                   </select>
-                  <input
-                    value={g.line}
-                    onChange={(e) => updateEditGame(i, "line", e.target.value)}
-                  />
+                  <input value={g.line} onChange={(e) => updateEditGame(i, "line", e.target.value)} />
                 </div>
               ))
             ) : (
