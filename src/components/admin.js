@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -8,6 +8,7 @@ export default function Admin() {
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+
   const [games, setGames] = useState([{ home: "", away: "", odd: "", type: "Over", line: "" }]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
@@ -65,7 +66,18 @@ export default function Admin() {
 
   async function createSlip() {
     try {
-      const body = { date, access, games };
+      const body = {
+        date,
+        access,
+        games: games.map(g => ({
+          home: g.home,
+          away: g.away,
+          odd: parseFloat(g.odd),
+          type: g.type,
+          line: g.line
+        }))
+      };
+
       const res = await fetch(`${API}/slips`, {
         method: "POST",
         headers: {
