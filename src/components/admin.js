@@ -9,13 +9,14 @@ export default function Admin() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [editSlip, setEditSlip] = useState(null);
-
   const token = localStorage.getItem("token");
   const limit = 10;
 
   useEffect(() => {
     const role = localStorage.getItem("role");
     if (role !== "admin") window.location.href = "/admin-login";
+
+    loadSlips(1);
   }, []);
 
   function logout() {
@@ -25,24 +26,20 @@ export default function Admin() {
 
   /* USERS */
   async function loadUsers() {
-    try {
-      const res = await fetch(`${API}/all-users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setUsers(data.users || []);
-    } catch {}
+    const res = await fetch(`${API}/all-users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setUsers(data.users || []);
   }
 
   /* REQUESTS */
   async function loadRequests() {
-    try {
-      const res = await fetch(`${API}/subscription-requests`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setRequests(data.requests || []);
-    } catch {}
+    const res = await fetch(`${API}/subscription-requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setRequests(data.requests || []);
   }
 
   async function approve(id) {
@@ -57,17 +54,15 @@ export default function Admin() {
 
   /* SLIPS */
   async function loadSlips(newPage = 1) {
-    try {
-      const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-      const data = await res.json();
-      setSlips(data.slips || []);
-      setPages(data.pages || 1);
-      setPage(newPage);
-    } catch {}
+    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+    const data = await res.json();
+    setSlips(data.slips || []);
+    setPages(data.pages || 1);
+    setPage(newPage);
   }
 
   function openEdit(slip) {
-    setEditSlip(slip);
+    setEditSlip({ ...slip });
   }
 
   function closeEdit() {
@@ -153,13 +148,15 @@ export default function Admin() {
         <h3>Slips</h3>
         <button className="btn" onClick={() => loadSlips(1)}>Load Slips</button>
 
+        {slips.length === 0 && <p>No slips available</p>}
+
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
             <p>
               {slip.date} — {slip.access?.toUpperCase()}
             </p>
 
-            {slip.games.map((g, i) => (
+            {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
 
@@ -191,9 +188,7 @@ export default function Admin() {
             ))}
 
             <div className="slip-footer">
-              <button className="btn btn-view" onClick={() => openEdit(slip)}>
-                Edit
-              </button>
+              <button className="btn btn-view" onClick={() => openEdit(slip)}>Edit</button>
               <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>
                 Delete
               </button>
@@ -260,9 +255,7 @@ export default function Admin() {
               </div>
             ))}
 
-            <button className="btn btn-upgrade" onClick={saveEdit}>
-              Save
-            </button>
+            <button className="btn btn-upgrade" onClick={saveEdit}>Save</button>
           </div>
         </div>
       )}
