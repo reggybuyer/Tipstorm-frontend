@@ -9,6 +9,7 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
+
   const token = localStorage.getItem("token");
 
   function logout() {
@@ -109,6 +110,7 @@ export default function User() {
         </button>
       </div>
 
+      {/* PREMIUM BLOCK WITH UPGRADE */}
       {user.premium ? (
         <div className="card premium-card">
           <span className={`plan-badge plan-${user.plan}`}>
@@ -120,6 +122,33 @@ export default function User() {
           <p>
             Remaining: <strong>{getRemainingDays()} days</strong>
           </p>
+
+          {user.plan !== "vip" && (
+            <div className="upgrade-card">
+              <h4>Upgrade your plan</h4>
+              <p>
+                You are on <strong>{user.plan.toUpperCase()}</strong>. Upgrade for more access.
+              </p>
+
+              <select
+                value={planSelect}
+                onChange={(e) => setPlanSelect(e.target.value)}
+              >
+                {user.plan === "weekly" && (
+                  <option value="monthly">Monthly - Ksh 1000</option>
+                )}
+                <option value="vip">VIP - Ksh 1500</option>
+              </select>
+
+              <div className="amount-display">
+                Amount: <strong>Ksh {getAmount()}</strong>
+              </div>
+
+              <button className="btn btn-upgrade" onClick={requestActivation}>
+                Request Upgrade
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="card upgrade-card">
@@ -131,11 +160,12 @@ export default function User() {
           </div>
           <div className="payment-box">
             <p><strong>Step 2:</strong> After payment</p>
-            <p>Forward M-Pesa confirmation message to:</p>
+            <p>Forward confirmation to:</p>
             <p><strong>WhatsApp: 0789906001</strong></p>
             <p>OR</p>
             <p>Email: <strong>support@tipstorm.com</strong></p>
           </div>
+
           <select
             value={planSelect}
             onChange={(e) => setPlanSelect(e.target.value)}
@@ -146,14 +176,6 @@ export default function User() {
           </select>
 
           <div className="amount-display">
-            Selected:
-            <span
-              className={`plan-badge plan-${planSelect}`}
-              style={{ marginLeft: "8px" }}
-            >
-              {planSelect.toUpperCase()}
-            </span>
-            <br />
             Amount: <strong>Ksh {getAmount()}</strong>
           </div>
 
@@ -163,7 +185,7 @@ export default function User() {
         </div>
       )}
 
-      {/* SLIPS */}
+      {/* SLIPS LIST */}
       <div className="card">
         <h3>Available Slips</h3>
         {slips.length === 0 && <p>No slips available</p>}
@@ -247,16 +269,13 @@ export default function User() {
             Previous
           </button>
           <span>Page {page}</span>
-          <button
-            className="btn"
-            onClick={() => loadSlips(page + 1)}
-          >
+          <button className="btn" onClick={() => loadSlips(page + 1)}>
             Next
           </button>
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL - FULL SLIP */}
       {selected && (
         <div className="modal">
           <div className="modal-content">
