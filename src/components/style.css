@@ -141,68 +141,63 @@
   font-size:14px;
 }
 
-/* ================= SLIP TABLE ================= */
-.slip-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-  background:#ffffff;
-  table-layout:fixed;
-  font-size:13px;
+/* ================= SLIPS TABLE SHRINK ================= */
+
+#slipsTable {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 12px; /* smaller text */
 }
 
-.slip-table th,
-.slip-table td{
-  border:1px solid #e5e7eb;
-  padding:6px;
-  text-align:center;
+#slipsTable th,
+#slipsTable td {
+  padding: 5px;
+  text-align: center;
+  word-wrap: break-word;
 }
 
-.slip-table th{
-  background:#f3f4f6;
-  font-weight:600;
+/* Date column */
+#slipsTable th:nth-child(1),
+#slipsTable td:nth-child(1) {
+  width: 70px;
 }
 
-.slip-table tbody tr:nth-child(even){
-  background:#fafafa;
+/* Plan column */
+#slipsTable th:nth-child(2),
+#slipsTable td:nth-child(2) {
+  width: 60px;
 }
 
-/* ===== SHRINKED COLUMN WIDTHS ===== */
-
-.slip-table th:nth-child(1),
-.slip-table td:nth-child(1){
-  width:80px;
+/* Games column */
+#slipsTable th:nth-child(3),
+#slipsTable td:nth-child(3) {
+  width: 150px;
 }
 
-.slip-table th:nth-child(2),
-.slip-table td:nth-child(2){
-  width:70px;
+/* Over/Under column */
+#slipsTable th:nth-child(4),
+#slipsTable td:nth-child(4) {
+  width: 90px;
 }
 
-.slip-table th:nth-child(3),
-.slip-table td:nth-child(3){
-  width:200px;
+/* Odds column */
+#slipsTable th:nth-child(5),
+#slipsTable td:nth-child(5) {
+  width: 60px;
 }
 
-.slip-table th:nth-child(4),
-.slip-table td:nth-child(4){
-  width:80px;
+/* Result column */
+#slipsTable th:nth-child(6),
+#slipsTable td:nth-child(6) {
+  width: 70px;
 }
 
-.slip-table th:nth-child(5),
-.slip-table td:nth-child(5){
-  width:80px;
-}
+/* Total odds column */
+#slipsTable th:nth-child(7),
+#slipsTable td:nth-child(7) {
+  width: 80px;
+} 
 
-.slip-table th:nth-child(6),
-.slip-table td:nth-child(6){
-  width:90px;
-}
-
-.slip-table th:nth-child(7),
-.slip-table td:nth-child(7){
-  width:80px;
-}
 
 /* ================= INNER TABLE ================= */
 .inner-table{
