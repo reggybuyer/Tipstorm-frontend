@@ -9,7 +9,6 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
-
   const token = localStorage.getItem("token");
 
   function logout() {
@@ -22,7 +21,6 @@ export default function User() {
       const res = await fetch(`${API}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       if (!data.success || !data.user) {
         logout();
@@ -72,7 +70,6 @@ export default function User() {
         message: "User requested upgrade",
       }),
     });
-
     alert("Request sent. Send payment message to WhatsApp.");
   }
 
@@ -111,15 +108,14 @@ export default function User() {
         </span>
         <p>
           Expires:{" "}
-          {user.expiresAt
-            ? new Date(user.expiresAt).toDateString()
-            : "No expiry"}
+          {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
         </p>
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
+
             <select
               value={planSelect}
               onChange={(e) => setPlanSelect(e.target.value)}
@@ -128,17 +124,44 @@ export default function User() {
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
+
             <div className="amount-display">
               Amount: <strong>Ksh {getAmount()}</strong>
             </div>
+
             <button className="btn btn-upgrade" onClick={requestActivation}>
               Request Upgrade (Send WhatsApp Payment)
             </button>
+
+            {/* PAYMENT DETAILS */}
+            <div className="card payment-box">
+              <h4>Manual Payment Details</h4>
+
+              <p>Playbill Number: <strong>625625</strong></p>
+              <p>Account Number: <strong>20170457</strong></p>
+
+              <p>After payment, send message with:</p>
+              <ul>
+                <li>Payment message</li>
+                <li>Your email</li>
+              </ul>
+
+              <p>WhatsApp: <strong>0789906001</strong></p>
+
+              <a
+                href="https://wa.me/254789906001"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-upgrade"
+              >
+                Send Payment Message on WhatsApp
+              </a>
+            </div>
           </div>
         )}
       </div>
 
-      {/* SLIPS TABLE VIEW */}
+      {/* SLIPS TABLE */}
       <div className="card">
         <h3>Available Slips</h3>
 

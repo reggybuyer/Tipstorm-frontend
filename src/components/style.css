@@ -1,5 +1,4 @@
 /* ================= GENERAL ================= */
-
 .section {
   padding: 20px;
   max-width: 1200px;
@@ -22,7 +21,6 @@
 }
 
 /* ================= GRID ================= */
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -30,7 +28,6 @@
 }
 
 /* ================= BUTTONS ================= */
-
 .btn {
   padding: 8px 14px;
   border-radius: 8px;
@@ -60,7 +57,6 @@
 }
 
 /* ================= PLAN BADGES ================= */
-
 .plan-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -90,7 +86,6 @@
 }
 
 /* ================= RESULT BADGES ================= */
-
 .result-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -112,7 +107,6 @@
 }
 
 /* ================= OVER UNDER ================= */
-
 .ou-badge {
   padding: 4px 10px;
   border-radius: 6px;
@@ -131,7 +125,6 @@
 }
 
 /* ================= GAME ROW ================= */
-
 .game-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
@@ -150,7 +143,6 @@
 }
 
 /* ================= SLIPS (CARD FORMAT) ================= */
-
 .slip-card {
   background: #f9fafb;
   padding: 15px;
@@ -177,7 +169,6 @@
 }
 
 /* ================= SLIP TABLE ================= */
-
 .slip-table {
   width: 100%;
   border-collapse: collapse;
@@ -202,7 +193,6 @@
 }
 
 /* ================= INNER TABLE (GAMES) ================= */
-
 .inner-table {
   width: 100%;
   border-collapse: collapse;
@@ -218,12 +208,7 @@
   background: #f9fafb;
 }
 
-/* ================= BADGES INSIDE TABLE ================= */
-
-.inner-table .plan-badge {
-  font-size: 11px;
-}
-
+/* ================= BUTTONS INSIDE TABLE ================= */
 .inner-table button {
   padding: 4px 8px;
   border-radius: 6px;
@@ -243,7 +228,6 @@
 }
 
 /* ================= PAGINATION ================= */
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -265,13 +249,21 @@
 }
 
 /* ================= UPGRADE SECTION ================= */
-
 .payment-box {
   background: #f3f4f6;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
-  margin-bottom: 10px;
+  margin-top: 12px;
   font-size: 14px;
+}
+
+.payment-box h4 {
+  margin-bottom: 6px;
+}
+
+.payment-box ul {
+  margin: 6px 0;
+  padding-left: 18px;
 }
 
 .amount-display {
@@ -284,7 +276,6 @@
 }
 
 /* ================= MODAL ================= */
-
 .modal {
   position: fixed;
   inset: 0;
@@ -314,13 +305,11 @@
 }
 
 /* ================= BLUR FOR PREMIUM ================= */
-
 .blur-teams {
   filter: blur(4px);
 }
 
 /* ================= LOCK OVERLAY ================= */
-
 .lock-overlay {
   background: #f87171;
   color: white;
@@ -331,7 +320,6 @@
 }
 
 /* ================= RESPONSIVE ================= */
-
 @media (max-width: 768px) {
   .game-row {
     grid-template-columns: 1fr;
