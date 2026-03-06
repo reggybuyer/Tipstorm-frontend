@@ -22,6 +22,7 @@ export default function User() {
       const res = await fetch(`${API}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = await res.json();
       if (!data.success || !data.user) {
         logout();
@@ -71,7 +72,8 @@ export default function User() {
         message: "User requested upgrade",
       }),
     });
-    alert("Request sent. Forward payment message to WhatsApp.");
+
+    alert("Request sent. Send payment message to WhatsApp.");
   }
 
   function openSlip(slip) {
@@ -118,8 +120,6 @@ export default function User() {
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-            <p>You are on {user.plan.toUpperCase()}.</p>
-
             <select
               value={planSelect}
               onChange={(e) => setPlanSelect(e.target.value)}
@@ -128,91 +128,112 @@ export default function User() {
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
-
             <div className="amount-display">
               Amount: <strong>Ksh {getAmount()}</strong>
             </div>
-
             <button className="btn btn-upgrade" onClick={requestActivation}>
-              Request Upgrade
+              Request Upgrade (Send WhatsApp Payment)
             </button>
           </div>
         )}
       </div>
 
-      {/* SLIPS */}
+      {/* SLIPS TABLE VIEW */}
       <div className="card">
         <h3>Available Slips</h3>
-        {slips.length === 0 && <p>No slips available</p>}
 
-        <div className="grid">
-          {slips.map((slip) => {
-            const allowed =
-              slip.access === "free" ||
-              (user.premium &&
-                (user.plan === "vip" || user.plan === slip.access));
+        {slips.length === 0 ? (
+          <p>No slips available</p>
+        ) : (
+          <table className="slip-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Access</th>
+                <th>Games</th>
+                <th>Total Odds</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {slips.map((slip) => {
+                const allowed =
+                  slip.access === "free" ||
+                  (user.premium &&
+                    (user.plan === "vip" || user.plan === slip.access));
 
-            const totalOdds = slip.games?.reduce(
-              (acc, g) => acc * (parseFloat(g.odd) || 1),
-              1
-            );
+                const totalOdds = slip.games?.reduce(
+                  (acc, g) => acc * (parseFloat(g.odd) || 1),
+                  1
+                );
 
-            return (
-              <div key={slip._id} className="slip-card">
-                <div className="slip-header">
-                  <strong>{slip.date}</strong>
-                  <span className={`plan-badge plan-${slip.access}`}>
-                    {slip.access.toUpperCase()}
-                  </span>
-                </div>
-
-                <div className={allowed ? "" : "blur-teams"}>
-                  {slip.games?.map((g, i) => (
-                    <div key={i} className="game-row">
-                      <div className="teams">
-                        {g.home} vs {g.away}
-                      </div>
-                      {g.type && (
-                        <span
-                          className={`ou-badge ${
-                            g.type === "Over" ? "ou-over" : "ou-under"
-                          }`}
-                        >
-                          {g.type} {g.line}
-                        </span>
-                      )}
-                      <div className="odd">Odd: {g.odd}</div>
-                      <span
-                        className={`result-badge result-${
-                          g.result || "pending"
-                        }`}
-                      >
-                        {g.result || "Pending"}
+                return (
+                  <tr key={slip._id}>
+                    <td>{slip.date}</td>
+                    <td>
+                      <span className={`plan-badge plan-${slip.access}`}>
+                        {slip.access.toUpperCase()}
                       </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="slip-footer">
-                  <strong>Total Odds: {totalOdds?.toFixed(2)}</strong>
-                </div>
-
-                {allowed ? (
-                  <button
-                    className="btn btn-view"
-                    onClick={() => openSlip(slip)}
-                  >
-                    View Full Slip
-                  </button>
-                ) : (
-                  <div className="lock-overlay">
-                    Premium slip — upgrade to view
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    </td>
+                    <td>
+                      {allowed ? (
+                        <table className="inner-table">
+                          <tbody>
+                            {slip.games?.map((g, i) => (
+                              <tr key={i}>
+                                <td>
+                                  {g.home} vs {g.away}
+                                </td>
+                                <td>
+                                  {g.type && (
+                                    <span
+                                      className={`ou-badge ${
+                                        g.type === "Over"
+                                          ? "ou-over"
+                                          : "ou-under"
+                                      }`}
+                                    >
+                                      {g.type} {g.line}
+                                    </span>
+                                  )}
+                                </td>
+                                <td>Odd: {g.odd}</td>
+                                <td>
+                                  <span
+                                    className={`result-badge result-${
+                                      g.result || "pending"
+                                    }`}
+                                  >
+                                    {g.result || "pending"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="lock-overlay">
+                          Premium slip — upgrade to view
+                        </div>
+                      )}
+                    </td>
+                    <td>{totalOdds?.toFixed(2)}</td>
+                    <td>
+                      {allowed && (
+                        <button
+                          className="btn btn-view"
+                          onClick={() => openSlip(slip)}
+                        >
+                          View
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
 
         <div className="pagination">
           <button
@@ -223,10 +244,7 @@ export default function User() {
             Previous
           </button>
           <span>Page {page}</span>
-          <button
-            className="btn"
-            onClick={() => loadSlips(page + 1)}
-          >
+          <button className="btn" onClick={() => loadSlips(page + 1)}>
             Next
           </button>
         </div>
@@ -236,24 +254,40 @@ export default function User() {
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>×</button>
+            <button className="close" onClick={closeSlip}>
+              ×
+            </button>
             <h3>{selected.date} - Full Details</h3>
 
-            {selected.games && selected.games.length > 0 ? (
-              selected.games.map((g, i) => (
-                <div key={i} className="game-row">
-                  <div className="teams">{g.home} vs {g.away}</div>
-                  <span className={`ou-badge ${
-                    g.type === "Over" ? "ou-over" : "ou-under"
-                  }`}>
-                    {g.type} {g.line}
-                  </span>
-                  <div className="odd">Odd: {g.odd}</div>
-                  <span className={`result-badge result-${g.result || "pending"}`}>
-                    {g.result || "pending"}
-                  </span>
-                </div>
-              ))
+            {selected.games?.length ? (
+              <table className="inner-table">
+                <tbody>
+                  {selected.games.map((g, i) => (
+                    <tr key={i}>
+                      <td>
+                        {g.home} vs {g.away}
+                      </td>
+                      <td>
+                        {g.type && (
+                          <span
+                            className={`ou-badge ${
+                              g.type === "Over" ? "ou-over" : "ou-under"
+                            }`}
+                          >
+                            {g.type} {g.line}
+                          </span>
+                        )}
+                      </td>
+                      <td>Odd: {g.odd}</td>
+                      <td>
+                        <span className={`result-badge result-${g.result}`}>
+                          {g.result}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : (
               <p>No game details available.</p>
             )}
