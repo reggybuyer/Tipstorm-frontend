@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -9,7 +9,6 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
-
   const token = localStorage.getItem("token");
 
   function logout() {
@@ -123,11 +122,9 @@ export default function User() {
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
-
             <div className="amount-display">
               Amount: <strong>Ksh {getAmount()}</strong>
             </div>
-
             <button className="btn btn-upgrade" onClick={requestActivation}>
               Request Upgrade (Send WhatsApp Payment)
             </button>
@@ -175,8 +172,7 @@ export default function User() {
               {slips.map((slip) => {
                 const allowed =
                   slip.access === "free" ||
-                  (user.premium &&
-                    (user.plan === "vip" || user.plan === slip.access));
+                  (user.premium && (user.plan === "vip" || user.plan === slip.access));
 
                 const totalOdds = slip.games?.reduce(
                   (acc, g) => acc * (parseFloat(g.odds) || 1),
@@ -191,7 +187,6 @@ export default function User() {
                         {slip.access.toUpperCase()}
                       </span>
                     </td>
-
                     <td>
                       {allowed ? (
                         <table className="inner-table">
@@ -199,13 +194,7 @@ export default function User() {
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
                                 <td>{g.home} vs {g.away}</td>
-                                <td>
-                                  {g.type && (
-                                    <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
-                                      {g.type} {g.line}
-                                    </span>
-                                  )}
-                                </td>
+                                <td>{g.overUnder || `${g.type} ${g.line}`}</td>
                                 <td>Odd: {g.odds}</td>
                                 <td>
                                   <span className={`result-badge result-${g.result || "pending"}`}>
@@ -220,9 +209,7 @@ export default function User() {
                         <div className="lock-overlay">Premium slip — upgrade to view</div>
                       )}
                     </td>
-
                     <td>{totalOdds?.toFixed(2)}</td>
-
                     <td>
                       {allowed && (
                         <button className="btn btn-view" onClick={() => openSlip(slip)}>
@@ -253,20 +240,13 @@ export default function User() {
           <div className="modal-content">
             <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
-
             {selected.games?.length ? (
               <table className="inner-table">
                 <tbody>
                   {selected.games.map((g, i) => (
                     <tr key={i}>
                       <td>{g.home} vs {g.away}</td>
-                      <td>
-                        {g.type && (
-                          <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
-                            {g.type} {g.line}
-                          </span>
-                        )}
-                      </td>
+                      <td>{g.overUnder || `${g.type} ${g.line}`}</td>
                       <td>Odd: {g.odds}</td>
                       <td>
                         <span className={`result-badge result-${g.result || "pending"}`}>
