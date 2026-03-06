@@ -9,6 +9,7 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
+
   const token = localStorage.getItem("token");
 
   function logout() {
@@ -102,7 +103,6 @@ export default function User() {
         </button>
       </div>
 
-      {/* UPGRADE SECTION */}
       <div className="card premium-card">
         <span className={`plan-badge plan-${user.plan}`}>
           {user.plan.toUpperCase()} PLAN
@@ -134,12 +134,12 @@ export default function User() {
 
             <div className="card payment-box">
               <h4>Manual Payment Details</h4>
-              <p>Playbill: <strong>625625</strong></p>
-              <p>Account: <strong>20170457</strong></p>
-              <p>After payment, send:</p>
+              <p>Playbill Number: <strong>625625</strong></p>
+              <p>Account Number: <strong>20170457</strong></p>
+              <p>After payment, send message with:</p>
               <ul>
-                <li>payment message</li>
-                <li>your email</li>
+                <li>Payment message</li>
+                <li>Your email</li>
               </ul>
               <p>WhatsApp: <strong>0789906001</strong></p>
               <a
@@ -148,7 +148,7 @@ export default function User() {
                 rel="noreferrer"
                 className="btn btn-upgrade"
               >
-                Send Payment Message
+                Send Payment Message on WhatsApp
               </a>
             </div>
           </div>
@@ -158,7 +158,6 @@ export default function User() {
       {/* SLIPS TABLE */}
       <div className="card">
         <h3>Available Slips</h3>
-
         {slips.length === 0 ? (
           <p>No slips available</p>
         ) : (
@@ -168,29 +167,25 @@ export default function User() {
                 <th>Date</th>
                 <th>Access</th>
                 <th>Games</th>
-                <th>Over/Under</th>
-                <th>Odd</th>
-                <th>Result</th>
                 <th>Total Odds</th>
                 <th>Action</th>
               </tr>
             </thead>
-
             <tbody>
               {slips.map((slip) => {
                 const allowed =
                   slip.access === "free" ||
-                  (user.premium && (user.plan === "vip" || user.plan === slip.access));
+                  (user.premium &&
+                    (user.plan === "vip" || user.plan === slip.access));
 
                 const totalOdds = slip.games?.reduce(
-                  (acc, g) => acc * (parseFloat(g.odd) || 1),
+                  (acc, g) => acc * (parseFloat(g.odds) || 1),
                   1
                 );
 
                 return (
                   <tr key={slip._id}>
                     <td>{slip.date}</td>
-
                     <td>
                       <span className={`plan-badge plan-${slip.access}`}>
                         {slip.access.toUpperCase()}
@@ -204,21 +199,14 @@ export default function User() {
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
                                 <td>{g.home} vs {g.away}</td>
-
                                 <td>
                                   {g.type && (
-                                    <span
-                                      className={`ou-badge ${
-                                        g.type === "Over" ? "ou-over" : "ou-under"
-                                      }`}
-                                    >
+                                    <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
                                       {g.type} {g.line}
                                     </span>
                                   )}
                                 </td>
-
-                                <td>Odd: {g.odd}</td>
-
+                                <td>Odd: {g.odds}</td>
                                 <td>
                                   <span className={`result-badge result-${g.result || "pending"}`}>
                                     {g.result || "pending"}
@@ -250,11 +238,7 @@ export default function User() {
         )}
 
         <div className="pagination">
-          <button
-            className="btn"
-            onClick={() => loadSlips(page - 1)}
-            disabled={page <= 1}
-          >
+          <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
             Previous
           </button>
           <span>Page {page}</span>
@@ -264,13 +248,10 @@ export default function User() {
         </div>
       </div>
 
-      {/* FULL SLIP MODAL */}
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>
-              ×
-            </button>
+            <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
 
             {selected.games?.length ? (
@@ -279,7 +260,6 @@ export default function User() {
                   {selected.games.map((g, i) => (
                     <tr key={i}>
                       <td>{g.home} vs {g.away}</td>
-
                       <td>
                         {g.type && (
                           <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
@@ -287,9 +267,7 @@ export default function User() {
                           </span>
                         )}
                       </td>
-
-                      <td>Odd: {g.odd}</td>
-
+                      <td>Odd: {g.odds}</td>
                       <td>
                         <span className={`result-badge result-${g.result || "pending"}`}>
                           {g.result || "pending"}
