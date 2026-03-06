@@ -23,12 +23,10 @@ export default function User() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-
       if (!data.success || !data.user) {
         logout();
         return;
       }
-
       setUser(data.user);
     } catch {
       logout();
@@ -73,7 +71,6 @@ export default function User() {
         message: "User requested upgrade",
       }),
     });
-
     alert("Request sent. Send payment message to WhatsApp.");
   }
 
@@ -90,7 +87,6 @@ export default function User() {
       window.location.href = "/login";
       return;
     }
-
     loadProfile();
     loadSlips();
   }, [token, loadProfile]);
@@ -112,15 +108,13 @@ export default function User() {
           {user.plan.toUpperCase()} PLAN
         </span>
         <p>
-          Expires:{" "}
-          {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
+          Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
         </p>
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-
             <select
               value={planSelect}
               onChange={(e) => setPlanSelect(e.target.value)}
@@ -138,7 +132,6 @@ export default function User() {
               Request Upgrade (Send WhatsApp Payment)
             </button>
 
-            {/* PAYMENT DETAILS */}
             <div className="card payment-box">
               <h4>Manual Payment Details</h4>
               <p>Playbill Number: <strong>625625</strong></p>
@@ -165,7 +158,6 @@ export default function User() {
       {/* SLIPS TABLE */}
       <div className="card">
         <h3>Available Slips</h3>
-
         {slips.length === 0 ? (
           <p>No slips available</p>
         ) : (
@@ -187,7 +179,7 @@ export default function User() {
                     (user.plan === "vip" || user.plan === slip.access));
 
                 const totalOdds = slip.games?.reduce(
-                  (acc, g) => acc * (parseFloat(g.odd) || 1),
+                  (acc, g) => acc * (parseFloat(g.odds) || 1),
                   1
                 );
 
@@ -199,34 +191,25 @@ export default function User() {
                         {slip.access.toUpperCase()}
                       </span>
                     </td>
+
                     <td>
                       {allowed ? (
                         <table className="inner-table">
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
+                                <td>{g.home} vs {g.away}</td>
                                 <td>
-                                  {g.home} vs {g.away}
-                                </td>
-                                <td>
-                                  {g.overUnder && (
-                                    <span
-                                      className={`ou-badge ${
-                                        g.overUnder === "Over"
-                                          ? "ou-over"
-                                          : "ou-under"
-                                      }`}
-                                    >
-                                      {g.overUnder}
+                                  {g.type && (
+                                    <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
+                                      {g.type} {g.line}
                                     </span>
                                   )}
                                 </td>
-                                <td>Odd: {g.odd}</td>
+                                <td>Odd: {g.odds}</td>
                                 <td>
-                                  <span
-                                    className={`result-badge result-${g.result}`}
-                                  >
-                                    {g.result}
+                                  <span className={`result-badge result-${g.result || "pending"}`}>
+                                    {g.result || "pending"}
                                   </span>
                                 </td>
                               </tr>
@@ -234,18 +217,15 @@ export default function User() {
                           </tbody>
                         </table>
                       ) : (
-                        <div className="lock-overlay">
-                          Premium slip — upgrade to view
-                        </div>
+                        <div className="lock-overlay">Premium slip — upgrade to view</div>
                       )}
                     </td>
+
                     <td>{totalOdds?.toFixed(2)}</td>
+
                     <td>
                       {allowed && (
-                        <button
-                          className="btn btn-view"
-                          onClick={() => openSlip(slip)}
-                        >
+                        <button className="btn btn-view" onClick={() => openSlip(slip)}>
                           View
                         </button>
                       )}
@@ -258,11 +238,7 @@ export default function User() {
         )}
 
         <div className="pagination">
-          <button
-            className="btn"
-            onClick={() => loadSlips(page - 1)}
-            disabled={page <= 1}
-          >
+          <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
             Previous
           </button>
           <span>Page {page}</span>
@@ -272,13 +248,10 @@ export default function User() {
         </div>
       </div>
 
-      {/* FULL SLIP MODAL */}
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>
-              ×
-            </button>
+            <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
 
             {selected.games?.length ? (
@@ -286,24 +259,18 @@ export default function User() {
                 <tbody>
                   {selected.games.map((g, i) => (
                     <tr key={i}>
+                      <td>{g.home} vs {g.away}</td>
                       <td>
-                        {g.home} vs {g.away}
-                      </td>
-                      <td>
-                        {g.overUnder && (
-                          <span
-                            className={`ou-badge ${
-                              g.overUnder === "Over" ? "ou-over" : "ou-under"
-                            }`}
-                          >
-                            {g.overUnder}
+                        {g.type && (
+                          <span className={`ou-badge ${g.type === "Over" ? "ou-over" : "ou-under"}`}>
+                            {g.type} {g.line}
                           </span>
                         )}
                       </td>
-                      <td>Odd: {g.odd}</td>
+                      <td>Odd: {g.odds}</td>
                       <td>
-                        <span className={`result-badge result-${g.result}`}>
-                          {g.result}
+                        <span className={`result-badge result-${g.result || "pending"}`}>
+                          {g.result || "pending"}
                         </span>
                       </td>
                     </tr>
