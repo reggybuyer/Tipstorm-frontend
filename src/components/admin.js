@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function Admin() {
+
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
@@ -11,6 +12,7 @@ export default function Admin() {
   const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
+
   const token = localStorage.getItem("token");
   const limit = 10;
 
@@ -20,18 +22,34 @@ export default function Admin() {
     loadSlips(1);
   }, []);
 
+  /* ================= BADGE ================= */
+
+  function badge(access) {
+    if (access === "free") return "🟢 FREE";
+    if (access === "weekly") return "🟡 WEEKLY";
+    if (access === "monthly") return "🟠 MONTHLY";
+    if (access === "vip") return "🔴 VIP";
+    return access;
+  }
+
+  /* ================= USERS ================= */
+
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const data = await res.json();
     setUsers(data.users || []);
   }
+
+  /* ================= REQUESTS ================= */
 
   async function loadRequests() {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const data = await res.json();
     setRequests(data.requests || []);
   }
@@ -39,12 +57,18 @@ export default function Admin() {
   async function approve(id) {
     await fetch(`${API}/approve-request`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ requestId: id }),
     });
+
     alert("User activated");
     loadRequests();
   }
+
+  /* ================= CREATE SLIP ================= */
 
   function addGameRow() {
     setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
@@ -68,9 +92,8 @@ export default function Admin() {
       games: games.map(g => ({
         home: g.home,
         away: g.away,
-        odd: parseFloat(g.odd) || 0,
-        type: g.type,
-        line: g.line || ""
+        odds: parseFloat(g.odd) || 0,
+        overUnder: g.type + " " + (g.line || ""),
       }))
     };
 
@@ -85,13 +108,14 @@ export default function Admin() {
       });
 
       const data = await res.json();
+
       if (data.success) {
         alert("Slip created");
         setGames([]);
         setDate("");
         loadSlips(page);
       } else {
-        alert("Failed (total odds must be >= 2)");
+        alert("Failed to create slip");
       }
     } catch (err) {
       console.error(err);
@@ -99,13 +123,18 @@ export default function Admin() {
     }
   }
 
+  /* ================= LOAD SLIPS ================= */
+
   async function loadSlips(newPage = 1) {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
     const data = await res.json();
+
     setSlips(data.slips || []);
     setPages(data.pages || 1);
     setPage(newPage);
   }
+
+  /* ================= RESULT UPDATE ================= */
 
   async function markResult(slipId, index, result) {
     await fetch(`${API}/slip-result`, {
@@ -116,18 +145,24 @@ export default function Admin() {
       },
       body: JSON.stringify({ slipId, gameIndex: index, result }),
     });
+
     loadSlips(page);
   }
 
   return (
     <div className="section">
+
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={() => { localStorage.clear(); window.location.href = "/"; }}>
+        <button
+          className="btn btn-logout"
+          onClick={() => { localStorage.clear(); window.location.href = "/"; }}
+        >
           Logout
         </button>
       </div>
 
+      {/* USERS */}
       <div className="card">
         <h3>Users</h3>
         <button className="btn" onClick={loadUsers}>Load Users</button>
@@ -139,6 +174,7 @@ export default function Admin() {
         ))}
       </div>
 
+      {/* REQUESTS */}
       <div className="card">
         <h3>Requests</h3>
         <button className="btn" onClick={loadRequests}>Load Requests</button>
@@ -146,14 +182,22 @@ export default function Admin() {
           <div key={r._id}>
             <strong>{r.email}</strong>
             <p>Plan: {r.plan}</p>
-            <button className="btn btn-view" onClick={() => approve(r._id)}>Activate</button>
+            <button className="btn btn-view" onClick={() => approve(r._id)}>
+              Activate
+            </button>
           </div>
         ))}
       </div>
 
+      {/* CREATE SLIP */}
       <div className="card">
         <h3>Create Slip</h3>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
 
         <select value={access} onChange={(e) => setAccess(e.target.value)}>
           <option value="free">Free</option>
@@ -196,34 +240,43 @@ export default function Admin() {
         <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
       </div>
 
+      {/* SLIPS */}
       <div className="card">
         <h3>Slips</h3>
+
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
+
             <div className="slip-header">
               <strong>{slip.date}</strong>
-              <span className={`plan-badge plan-${slip.access}`}>{slip.access}</span>
+              <span className="plan-badge">{badge(slip.access)}</span>
             </div>
 
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
-                <span>{g.type} {g.line}</span>
-                <span>Odd: {g.odd}</span>
+                <span>{g.overUnder}</span>
+                <span>Odd: {g.odds}</span>
                 <span>{g.result || "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
               </div>
             ))}
+
           </div>
         ))}
 
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
+            Prev
+          </button>
           <span>Page {page} of {pages}</span>
-          <button onClick={() => loadSlips(page + 1)}>Next</button>
+          <button onClick={() => loadSlips(page + 1)}>
+            Next
+          </button>
         </div>
       </div>
+
     </div>
   );
 } 
