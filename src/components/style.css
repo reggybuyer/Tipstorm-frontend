@@ -159,7 +159,7 @@
 /* Date column */
 #slipsTable th:nth-child(1),
 #slipsTable td:nth-child(1) {
-  width: 70px;
+  width: 65px;
 }
 
 /* Plan column */
@@ -171,31 +171,31 @@
 /* Games column */
 #slipsTable th:nth-child(3),
 #slipsTable td:nth-child(3) {
-  width: 150px;
+  width: 140px;
 }
 
 /* Over/Under column */
 #slipsTable th:nth-child(4),
 #slipsTable td:nth-child(4) {
-  width: 90px;
+  width: 120px;
 }
 
 /* Odds column */
 #slipsTable th:nth-child(5),
 #slipsTable td:nth-child(5) {
-  width: 60px;
+  width: 55px;
 }
 
 /* Result column */
 #slipsTable th:nth-child(6),
 #slipsTable td:nth-child(6) {
-  width: 70px;
+  width: 65px;
 }
 
 /* Total odds column */
 #slipsTable th:nth-child(7),
 #slipsTable td:nth-child(7) {
-  width: 80px;
+  width: 70px;
 } 
 
 
