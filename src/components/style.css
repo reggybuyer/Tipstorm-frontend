@@ -1,4 +1,5 @@
 /* ================= GENERAL ================= */
+
 .section {
   padding: 20px;
   max-width: 1200px;
@@ -21,6 +22,7 @@
 }
 
 /* ================= GRID ================= */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -28,6 +30,7 @@
 }
 
 /* ================= BUTTONS ================= */
+
 .btn {
   padding: 8px 14px;
   border-radius: 8px;
@@ -57,6 +60,7 @@
 }
 
 /* ================= PLAN BADGES ================= */
+
 .plan-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -86,6 +90,7 @@
 }
 
 /* ================= RESULT BADGES ================= */
+
 .result-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -107,6 +112,7 @@
 }
 
 /* ================= OVER UNDER ================= */
+
 .ou-badge {
   padding: 4px 10px;
   border-radius: 6px;
@@ -125,6 +131,7 @@
 }
 
 /* ================= GAME ROW ================= */
+
 .game-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
@@ -142,7 +149,8 @@
   font-weight: 500;
 }
 
-/* ================= SLIPS ================= */
+/* ================= SLIPS (CARD FORMAT) ================= */
+
 .slip-card {
   background: #f9fafb;
   padding: 15px;
@@ -168,7 +176,74 @@
   font-size: 14px;
 }
 
+/* ================= SLIP TABLE ================= */
+
+.slip-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #ffffff;
+}
+
+.slip-table th,
+.slip-table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: left;
+}
+
+.slip-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.slip-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ================= INNER TABLE (GAMES) ================= */
+
+.inner-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inner-table td {
+  border: 1px solid #e5e7eb;
+  padding: 6px;
+  font-size: 14px;
+}
+
+.inner-table tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+/* ================= BADGES INSIDE TABLE ================= */
+
+.inner-table .plan-badge {
+  font-size: 11px;
+}
+
+.inner-table button {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.inner-table button:first-child {
+  background: #16a34a;
+  color: white;
+}
+
+.inner-table button:last-child {
+  background: #dc2626;
+  color: white;
+}
+
 /* ================= PAGINATION ================= */
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -190,6 +265,7 @@
 }
 
 /* ================= UPGRADE SECTION ================= */
+
 .payment-box {
   background: #f3f4f6;
   padding: 10px;
@@ -208,6 +284,7 @@
 }
 
 /* ================= MODAL ================= */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -237,11 +314,13 @@
 }
 
 /* ================= BLUR FOR PREMIUM ================= */
+
 .blur-teams {
   filter: blur(4px);
 }
 
 /* ================= LOCK OVERLAY ================= */
+
 .lock-overlay {
   background: #f87171;
   color: white;
@@ -252,6 +331,7 @@
 }
 
 /* ================= RESPONSIVE ================= */
+
 @media (max-width: 768px) {
   .game-row {
     grid-template-columns: 1fr;
@@ -260,5 +340,10 @@
   .header-row {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .slip-table,
+  .inner-table {
+    font-size: 13px;
   }
 } 
