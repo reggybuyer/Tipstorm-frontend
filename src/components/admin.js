@@ -142,8 +142,10 @@ export default function Admin() {
 
     if (data.success) {
       alert("Slip created");
+
       setGames([]);
       setDate("");
+
       loadSlips(page);
     } else {
       alert("Failed to create slip");
@@ -154,6 +156,7 @@ export default function Admin() {
 
   async function loadSlips(newPage = 1) {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+
     const data = await res.json();
 
     setSlips(data.slips || []);
@@ -174,23 +177,30 @@ export default function Admin() {
     loadSlips(page);
   }
 
-  /* ================= RESULT UPDATE ================= */
+  /* ================= RESULT UPDATE (FIXED) ================= */
 
   async function markResult(slipId, index, result) {
-    await fetch(`${API}/slip-result`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        slipId,
-        gameIndex: index,
-        result,
-      }),
-    });
+    try {
+      const res = await fetch(`${API}/slip-result`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          slipId: slipId,
+          index: index,
+          result: result,
+        }),
+      });
 
-    loadSlips(page);
+      const data = await res.json();
+      console.log("Result updated:", data);
+
+      loadSlips(page);
+    } catch (err) {
+      console.error("Result update failed", err);
+    }
   }
 
   return (
@@ -270,7 +280,6 @@ export default function Admin() {
       {/* CREATE SLIP */}
 
       <div className="card">
-
         <h3>Create Slip</h3>
 
         <input
@@ -295,33 +304,25 @@ export default function Admin() {
             <input
               placeholder="Home"
               value={g.home}
-              onChange={(e) =>
-                updateGame(i, "home", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "home", e.target.value)}
             />
 
             <input
               placeholder="Away"
               value={g.away}
-              onChange={(e) =>
-                updateGame(i, "away", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "away", e.target.value)}
             />
 
             <input
               placeholder="Odd"
               type="number"
               value={g.odd}
-              onChange={(e) =>
-                updateGame(i, "odd", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "odd", e.target.value)}
             />
 
             <select
               value={g.type}
-              onChange={(e) =>
-                updateGame(i, "type", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "type", e.target.value)}
             >
               <option value="Over">Over</option>
               <option value="Under">Under</option>
@@ -330,9 +331,7 @@ export default function Admin() {
             <input
               placeholder="Line"
               value={g.line}
-              onChange={(e) =>
-                updateGame(i, "line", e.target.value)
-              }
+              onChange={(e) => updateGame(i, "line", e.target.value)}
             />
 
           </div>
@@ -354,14 +353,15 @@ export default function Admin() {
       {/* SLIPS */}
 
       <div className="card">
-
         <h3>Slips</h3>
 
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
 
             <div className="slip-header">
+
               <strong>{slip.date}</strong>
+
               <span className="plan-badge">
                 {badge(slip.access)}
               </span>
@@ -378,9 +378,7 @@ export default function Admin() {
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
 
-                <span>
-                  {g.home} vs {g.away}
-                </span>
+                <span>{g.home} vs {g.away}</span>
 
                 <span>{g.overUnder}</span>
 
@@ -388,19 +386,11 @@ export default function Admin() {
 
                 <span>{g.result || "pending"}</span>
 
-                <button
-                  onClick={() =>
-                    markResult(slip._id, i, "win")
-                  }
-                >
+                <button onClick={() => markResult(slip._id, i, "win")}>
                   Won
                 </button>
 
-                <button
-                  onClick={() =>
-                    markResult(slip._id, i, "lost")
-                  }
-                >
+                <button onClick={() => markResult(slip._id, i, "lost")}>
                   Lost
                 </button>
 
