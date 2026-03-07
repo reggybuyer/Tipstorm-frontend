@@ -123,7 +123,7 @@ export default function Admin() {
       games: games.map((g) => ({
         home: g.home,
         away: g.away,
-        odd: parseFloat(g.odd) || 0,
+        odds: parseFloat(g.odd) || 1,
         overUnder: g.type + " " + (g.line || ""),
         result: "pending",
       })),
@@ -142,10 +142,8 @@ export default function Admin() {
 
     if (data.success) {
       alert("Slip created");
-
       setGames([]);
       setDate("");
-
       loadSlips(page);
     } else {
       alert("Failed to create slip");
@@ -156,7 +154,6 @@ export default function Admin() {
 
   async function loadSlips(newPage = 1) {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-
     const data = await res.json();
 
     setSlips(data.slips || []);
@@ -177,30 +174,23 @@ export default function Admin() {
     loadSlips(page);
   }
 
-  /* ================= RESULT UPDATE (FIXED) ================= */
+  /* ================= RESULT UPDATE ================= */
 
   async function markResult(slipId, index, result) {
-    try {
-      const res = await fetch(`${API}/slip-result`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          slipId: slipId,
-          index: index,
-          result: result,
-        }),
-      });
+    await fetch(`${API}/slip-result`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        slipId,
+        gameIndex: index,
+        result,
+      }),
+    });
 
-      const data = await res.json();
-      console.log("Result updated:", data);
-
-      loadSlips(page);
-    } catch (err) {
-      console.error("Result update failed", err);
-    }
+    loadSlips(page);
   }
 
   return (
@@ -208,7 +198,6 @@ export default function Admin() {
 
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-
         <button
           className="btn btn-logout"
           onClick={() => {
@@ -221,48 +210,34 @@ export default function Admin() {
       </div>
 
       {/* USERS */}
-
       <div className="card">
         <h3>Users</h3>
-
         {users.map((u) => (
           <div key={u._id} className="game-row">
-
             <span>{u.email}</span>
-
-            <span className="plan-badge">
-              {u.plan}
-            </span>
-
+            <span className="plan-badge">{u.plan}</span>
             <span>
               Expiry: {u.expiresAt
                 ? new Date(u.expiresAt).toDateString()
                 : "No expiry"}
             </span>
-
             <button
               className="btn btn-logout"
               onClick={() => deleteUser(u._id)}
             >
               Delete
             </button>
-
           </div>
         ))}
       </div>
 
       {/* REQUESTS */}
-
       <div className="card">
         <h3>Subscription Requests</h3>
-
         {requests.map((r) => (
           <div key={r._id} className="game-row">
-
             <span>{r.email}</span>
-
             <span>{r.plan}</span>
-
             <button
               className="btn btn-view"
               onClick={() => approve(r._id, r.expiryDate)}
@@ -272,22 +247,18 @@ export default function Admin() {
                 ? "Active"
                 : "Activate"}
             </button>
-
           </div>
         ))}
       </div>
 
       {/* CREATE SLIP */}
-
       <div className="card">
         <h3>Create Slip</h3>
-
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-
         <select
           value={access}
           onChange={(e) => setAccess(e.target.value)}
@@ -300,26 +271,22 @@ export default function Admin() {
 
         {games.map((g, i) => (
           <div key={i} className="game-row">
-
             <input
               placeholder="Home"
               value={g.home}
               onChange={(e) => updateGame(i, "home", e.target.value)}
             />
-
             <input
               placeholder="Away"
               value={g.away}
               onChange={(e) => updateGame(i, "away", e.target.value)}
             />
-
             <input
               placeholder="Odd"
               type="number"
               value={g.odd}
               onChange={(e) => updateGame(i, "odd", e.target.value)}
             />
-
             <select
               value={g.type}
               onChange={(e) => updateGame(i, "type", e.target.value)}
@@ -327,13 +294,11 @@ export default function Admin() {
               <option value="Over">Over</option>
               <option value="Under">Under</option>
             </select>
-
             <input
               placeholder="Line"
               value={g.line}
               onChange={(e) => updateGame(i, "line", e.target.value)}
             />
-
           </div>
         ))}
 
@@ -341,89 +306,64 @@ export default function Admin() {
           Add Game
         </button>
 
-        <button
-          className="btn btn-upgrade"
-          onClick={createSlip}
-        >
+        <button className="btn btn-upgrade" onClick={createSlip}>
           Create Slip
         </button>
-
       </div>
 
       {/* SLIPS */}
-
       <div className="card">
         <h3>Slips</h3>
-
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
-
             <div className="slip-header">
-
               <strong>{slip.date}</strong>
-
-              <span className="plan-badge">
-                {badge(slip.access)}
-              </span>
-
+              <span className="plan-badge">{badge(slip.access)}</span>
               <button
                 className="btn btn-logout"
                 onClick={() => deleteSlip(slip._id)}
               >
                 Delete Slip
               </button>
-
             </div>
 
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
-
-                <span>{g.home} vs {g.away}</span>
-
+                <span>
+                  {g.home} vs {g.away}
+                </span>
                 <span>{g.overUnder}</span>
-
-                <span>Odd: {g.odd}</span>
-
+                <span>Odd: {g.odds}</span>
                 <span>{g.result || "pending"}</span>
-
                 <button onClick={() => markResult(slip._id, i, "win")}>
                   Won
                 </button>
-
                 <button onClick={() => markResult(slip._id, i, "lost")}>
                   Lost
                 </button>
-
               </div>
             ))}
-
           </div>
         ))}
 
         <div className="pagination">
-
           <button
             disabled={page <= 1}
             onClick={() => loadSlips(page - 1)}
           >
             Prev
           </button>
-
           <span>
             Page {page} of {pages}
           </span>
-
           <button
             disabled={page >= pages}
             onClick={() => loadSlips(page + 1)}
           >
             Next
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 } 
