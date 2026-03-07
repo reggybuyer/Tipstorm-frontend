@@ -20,14 +20,7 @@
   align-items:center;
 }
 
-/* ================= GRID ================= */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:15px;
-}
-
-/* ================= BUTTONS ================= */
+/* ================= BUTTON COLORS ================= */
 .btn{
   padding:8px 14px;
   border-radius:8px;
@@ -37,9 +30,7 @@
   background:#e5e7eb;
 }
 
-.btn:hover{
-  opacity:0.85;
-}
+.btn:hover{opacity:0.85;}
 
 .btn-logout{
   background:#ef4444;
@@ -96,7 +87,7 @@
 .ou-over{background:#16a34a;}
 .ou-under{background:#2563eb;}
 
-/* ================= ODDS ================= */
+/* ================= ODDS COLOR ================= */
 .odds{
   color:#f59e0b;
   font-weight:600;
@@ -112,9 +103,7 @@
   align-items:center;
 }
 
-.teams{
-  font-weight:600;
-}
+.teams{font-weight:600;}
 
 /* ================= SLIP TABLE ================= */
 .slip-table{
@@ -203,9 +192,7 @@
   font-size:14px;
 }
 
-.payment-box h4{
-  margin-bottom:6px;
-}
+.payment-box h4{margin-bottom:6px;}
 
 .payment-box ul{
   margin:6px 0;
@@ -247,9 +234,7 @@
 }
 
 /* ================= BLUR PREMIUM ================= */
-.blur-teams{
-  filter:blur(4px);
-}
+.blur-teams{filter:blur(4px);}
 
 /* ================= LOCK ================= */
 .lock-overlay{
@@ -263,7 +248,6 @@
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:768px){
-
   .game-row{
     grid-template-columns:1fr;
   }
@@ -277,5 +261,4 @@
   .inner-table{
     font-size:12px;
   }
-
 } 
