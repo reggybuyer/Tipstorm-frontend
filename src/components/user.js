@@ -36,7 +36,7 @@ export default function User() {
     }
   }, [token]);
 
-  async function loadSlips(newPage = 1) {
+  const loadSlips = useCallback(async (newPage = 1) => {
     try {
       const res = await fetch(`${API}/slips?page=${newPage}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -48,7 +48,7 @@ export default function User() {
     } catch {
       setSlips([]);
     }
-  }
+  }, [token]);
 
   function getRemainingDays() {
     if (!user?.expiresAt) return 0;
@@ -94,7 +94,7 @@ export default function User() {
     }
     loadProfile();
     loadSlips();
-  }, [token, loadProfile]);
+  }, [token, loadProfile, loadSlips]);
 
   if (loading) return <div className="section">Loading...</div>;
   if (!user) return <div className="section">Session expired.</div>;
@@ -190,6 +190,24 @@ export default function User() {
                               <tr key={i}>
                                 <td>{g.home} vs {g.away}</td>
                                 <td>{g.overUnder || `${g.type} ${g.line}`}</td>
+                                <td>Odd: {Number(g.odds).toFixed(2)}</td>
+                                <td>
+                                  <span
+                                    className={`result-badge result-${g.result || "pending"}`}
+                                  >
+                                    {g.result || "pending"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : slip.access === "free" ? (
+                        <table className="inner-table">
+                          <tbody>
+                            {slip.games?.map((g, i) => (
+                              <tr key={i}>
+                                <td>{g.home} vs {g.away}</td>
                                 <td>Odd: {Number(g.odds).toFixed(2)}</td>
                                 <td>
                                   <span
