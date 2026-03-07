@@ -19,6 +19,7 @@ export default function Admin() {
 
   useEffect(() => {
     const role = localStorage.getItem("role");
+
     if (role !== "admin") {
       window.location.href = "/admin-login";
       return;
@@ -27,6 +28,8 @@ export default function Admin() {
     loadUsers();
     loadRequests();
     loadSlips(1);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ================= BADGE ================= */
