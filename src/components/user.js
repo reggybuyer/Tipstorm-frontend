@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API =
-  process.env.REACT_APP_API_BASE ||
-  "https://tipstorm-backend.onrender.com";
+const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -24,14 +22,12 @@ export default function User() {
       const res = await fetch(`${API}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
 
       if (!data.success || !data.user) {
         logout();
         return;
       }
-
       setUser(data.user);
     } catch {
       logout();
@@ -42,7 +38,10 @@ export default function User() {
 
   async function loadSlips(newPage = 1) {
     try {
-      const res = await fetch(`${API}/slips?page=${newPage}`);
+      const res = await fetch(`${API}/slips?page=${newPage}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       const data = await res.json();
       setSlips(data.slips || []);
       setPage(newPage);
@@ -76,6 +75,7 @@ export default function User() {
         message: "User requested upgrade",
       }),
     });
+
     alert("Request sent. Send payment message to WhatsApp.");
   }
 
@@ -94,8 +94,7 @@ export default function User() {
     }
     loadProfile();
     loadSlips();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, loadProfile]);
 
   if (loading) return <div className="section">Loading...</div>;
   if (!user) return <div className="section">Session expired.</div>;
@@ -113,6 +112,7 @@ export default function User() {
         <span className={`plan-badge plan-${user.plan}`}>
           {user.plan.toUpperCase()} PLAN
         </span>
+
         <p>
           Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
         </p>
@@ -121,6 +121,7 @@ export default function User() {
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
+
             <select
               value={planSelect}
               onChange={(e) => setPlanSelect(e.target.value)}
@@ -137,26 +138,6 @@ export default function User() {
             <button className="btn btn-upgrade" onClick={requestActivation}>
               Request Upgrade (Send WhatsApp Payment)
             </button>
-
-            <div className="card payment-box">
-              <h4>Manual Payment Details</h4>
-              <p>Playbill Number: <strong>625625</strong></p>
-              <p>Account Number: <strong>20170457</strong></p>
-              <p>After payment, send message with:</p>
-              <ul>
-                <li>Payment message</li>
-                <li>Your email</li>
-              </ul>
-              <p>WhatsApp: <strong>0789906001</strong></p>
-              <a
-                href="https://wa.me/254789906001"
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-upgrade"
-              >
-                Send Payment Message on WhatsApp
-              </a>
-            </div>
           </div>
         )}
       </div>
@@ -178,11 +159,13 @@ export default function User() {
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {slips.map((slip) => {
                 const allowed =
                   slip.access === "free" ||
-                  (user.premium && (user.plan === "vip" || user.plan === slip.access));
+                  (user?.premium &&
+                    (user.plan === "vip" || user.plan === slip.access));
 
                 const totalOdds = slip.games?.reduce(
                   (acc, g) => acc * (Number(g.odds) || 1),
@@ -209,7 +192,9 @@ export default function User() {
                                 <td>{g.overUnder || `${g.type} ${g.line}`}</td>
                                 <td>Odd: {Number(g.odds).toFixed(2)}</td>
                                 <td>
-                                  <span className={`result-badge result-${g.result || "pending"}`}>
+                                  <span
+                                    className={`result-badge result-${g.result || "pending"}`}
+                                  >
                                     {g.result || "pending"}
                                   </span>
                                 </td>
@@ -228,7 +213,10 @@ export default function User() {
 
                     <td>
                       {allowed && (
-                        <button className="btn btn-view" onClick={() => openSlip(slip)}>
+                        <button
+                          className="btn btn-view"
+                          onClick={() => openSlip(slip)}
+                        >
                           View
                         </button>
                       )}
@@ -241,7 +229,11 @@ export default function User() {
         )}
 
         <div className="pagination">
-          <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
+          <button
+            className="btn"
+            onClick={() => loadSlips(page - 1)}
+            disabled={page <= 1}
+          >
             Previous
           </button>
           <span>Page {page}</span>
