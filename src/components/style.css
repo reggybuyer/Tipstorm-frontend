@@ -8,10 +8,10 @@
 
 .card{
   background:#ffffff;
-  padding:18px;
-  border-radius:12px;
+  padding:20px;
+  border-radius:10px;
   margin-bottom:20px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
 .header-row{
@@ -58,10 +58,10 @@
 
 /* ================= PLAN BADGES ================= */
 .plan-badge{
-  padding:4px 10px;
-  border-radius:20px;
+  padding:4px 9px;
+  border-radius:6px;
   font-size:12px;
-  font-weight:bold;
+  font-weight:600;
   color:white;
 }
 
@@ -73,8 +73,8 @@
 
 /* ================= RESULT BADGES ================= */
 .result-badge{
-  padding:4px 10px;
-  border-radius:20px;
+  padding:3px 8px;
+  border-radius:5px;
   font-size:12px;
   font-weight:600;
   color:white;
@@ -82,20 +82,25 @@
 
 .result-win{background:#16a34a;}
 .result-lost{background:#dc2626;}
-.result-pending{background:#6b7280;}
+.result-pending{background:#f59e0b;}
 
 /* ================= OVER / UNDER ================= */
 .ou-badge{
-  padding:4px 10px;
-  border-radius:6px;
+  padding:3px 7px;
+  border-radius:5px;
   font-size:12px;
   font-weight:600;
   color:white;
-  display:inline-block;
 }
 
-.ou-over{background:#2563eb;}
-.ou-under{background:#9333ea;}
+.ou-over{background:#16a34a;}
+.ou-under{background:#2563eb;}
+
+/* ================= ODDS ================= */
+.odds{
+  color:#f59e0b;
+  font-weight:600;
+}
 
 /* ================= GAME ROW ================= */
 .game-row{
@@ -111,93 +116,31 @@
   font-weight:600;
 }
 
-.odd{
-  font-weight:500;
+/* ================= SLIP TABLE ================= */
+.slip-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  background:#ffffff;
+  font-size:13px;
 }
 
-/* ================= SLIP CARDS ================= */
-.slip-card{
-  background:#f9fafb;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
+.slip-table th{
+  background:#f3f4f6;
+  font-weight:600;
+  padding:8px;
+  text-align:center;
 }
 
-.slip-card p{
-  font-weight:bold;
-  margin-bottom:8px;
+.slip-table td{
+  border-bottom:1px solid #e5e7eb;
+  padding:8px;
+  text-align:center;
 }
 
-.slip-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.slip-table tbody tr:nth-child(even){
+  background:#fafafa;
 }
-
-.slip-footer{
-  margin-top:8px;
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-}
-
-/* ================= SLIPS TABLE SHRINK ================= */
-
-#slipsTable {
-  width: 100%;
-  table-layout: fixed;
-  font-size: 12px; /* smaller text */
-}
-
-#slipsTable th,
-#slipsTable td {
-  padding: 5px;
-  text-align: center;
-  word-wrap: break-word;
-}
-
-/* Date column */
-#slipsTable th:nth-child(1),
-#slipsTable td:nth-child(1) {
-  width: 65px;
-}
-
-/* Plan column */
-#slipsTable th:nth-child(2),
-#slipsTable td:nth-child(2) {
-  width: 60px;
-}
-
-/* Games column */
-#slipsTable th:nth-child(3),
-#slipsTable td:nth-child(3) {
-  width: 140px;
-}
-
-/* Over/Under column */
-#slipsTable th:nth-child(4),
-#slipsTable td:nth-child(4) {
-  width: 120px;
-}
-
-/* Odds column */
-#slipsTable th:nth-child(5),
-#slipsTable td:nth-child(5) {
-  width: 55px;
-}
-
-/* Result column */
-#slipsTable th:nth-child(6),
-#slipsTable td:nth-child(6) {
-  width: 65px;
-}
-
-/* Total odds column */
-#slipsTable th:nth-child(7),
-#slipsTable td:nth-child(7) {
-  width: 70px;
-} 
-
 
 /* ================= INNER TABLE ================= */
 .inner-table{
@@ -206,16 +149,12 @@
 }
 
 .inner-table td{
-  border:1px solid #e5e7eb;
   padding:6px;
   font-size:13px;
+  border-bottom:1px solid #f1f1f1;
 }
 
-.inner-table tr:nth-child(even){
-  background:#f9fafb;
-}
-
-/* ================= BUTTONS INSIDE TABLE ================= */
+/* ================= TABLE BUTTONS ================= */
 .inner-table button{
   padding:4px 8px;
   border-radius:6px;
@@ -236,23 +175,23 @@
 
 /* ================= PAGINATION ================= */
 .pagination{
+  margin-top:15px;
   display:flex;
   justify-content:center;
   gap:10px;
-  margin-top:15px;
 }
 
 .pagination button{
+  background:#2563eb;
+  color:white;
+  border:none;
   padding:6px 12px;
   border-radius:6px;
-  border:none;
   cursor:pointer;
-  background:#e5e7eb;
 }
 
 .pagination button:disabled{
-  opacity:0.5;
-  cursor:not-allowed;
+  background:#9ca3af;
 }
 
 /* ================= PAYMENT SECTION ================= */
@@ -276,10 +215,6 @@
 .amount-display{
   margin:10px 0;
   font-weight:bold;
-}
-
-.upgrade-card{
-  margin-top:15px;
 }
 
 /* ================= MODAL ================= */

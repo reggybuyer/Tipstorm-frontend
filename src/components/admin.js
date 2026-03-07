@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 const API =
-  process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
+  process.env.REACT_APP_API_BASE ||
+  "https://tipstorm-backend.onrender.com";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -18,7 +19,13 @@ export default function Admin() {
 
   useEffect(() => {
     const role = localStorage.getItem("role");
-    if (role !== "admin") window.location.href = "/admin-login";
+    if (role !== "admin") {
+      window.location.href = "/admin-login";
+      return;
+    }
+
+    loadUsers();
+    loadRequests();
     loadSlips(1);
   }, []);
 
@@ -43,6 +50,17 @@ export default function Admin() {
     setUsers(data.users || []);
   }
 
+  async function deleteUser(id) {
+    if (!window.confirm("Delete this user?")) return;
+
+    await fetch(`${API}/delete-user/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    loadUsers();
+  }
+
   /* ================= REQUESTS ================= */
 
   async function loadRequests() {
@@ -54,7 +72,12 @@ export default function Admin() {
     setRequests(data.requests || []);
   }
 
-  async function approve(id) {
+  async function approve(id, expiryDate) {
+    if (expiryDate && new Date(expiryDate) > new Date()) {
+      alert("User is still active. Cannot re-activate before expiry.");
+      return;
+    }
+
     await fetch(`${API}/approve-request`, {
       method: "POST",
       headers: {
@@ -65,7 +88,9 @@ export default function Admin() {
     });
 
     alert("User activated");
+
     loadRequests();
+    loadUsers();
   }
 
   /* ================= CREATE SLIP ================= */
@@ -101,29 +126,24 @@ export default function Admin() {
       })),
     };
 
-    try {
-      const res = await fetch(`${API}/slips`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
+    const res = await fetch(`${API}/slips`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (data.success) {
-        alert("Slip created");
-        setGames([]);
-        setDate("");
-        loadSlips(page);
-      } else {
-        alert("Failed to create slip");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
+    if (data.success) {
+      alert("Slip created");
+      setGames([]);
+      setDate("");
+      loadSlips(page);
+    } else {
+      alert("Failed to create slip");
     }
   }
 
@@ -131,12 +151,24 @@ export default function Admin() {
 
   async function loadSlips(newPage = 1) {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-
     const data = await res.json();
 
     setSlips(data.slips || []);
     setPages(data.pages || 1);
     setPage(newPage);
+  }
+
+  /* ================= DELETE SLIP ================= */
+
+  async function deleteSlip(id) {
+    if (!window.confirm("Delete this slip?")) return;
+
+    await fetch(`${API}/delete-slip/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    loadSlips(page);
   }
 
   /* ================= RESULT UPDATE ================= */
@@ -160,6 +192,7 @@ export default function Admin() {
 
   return (
     <div className="section">
+
       <div className="header-row">
         <h2>Admin Dashboard</h2>
 
@@ -179,14 +212,28 @@ export default function Admin() {
       <div className="card">
         <h3>Users</h3>
 
-        <button className="btn" onClick={loadUsers}>
-          Load Users
-        </button>
-
         {users.map((u) => (
-          <div key={u.email}>
-            <strong>{u.email}</strong>
-            <p>Plan: {u.plan}</p>
+          <div key={u._id} className="game-row">
+
+            <span>{u.email}</span>
+
+            <span className="plan-badge">
+              {u.plan}
+            </span>
+
+            <span>
+              Expiry: {u.expiresAt
+                ? new Date(u.expiresAt).toDateString()
+                : "No expiry"}
+            </span>
+
+            <button
+              className="btn btn-logout"
+              onClick={() => deleteUser(u._id)}
+            >
+              Delete
+            </button>
+
           </div>
         ))}
       </div>
@@ -194,20 +241,25 @@ export default function Admin() {
       {/* REQUESTS */}
 
       <div className="card">
-        <h3>Requests</h3>
-
-        <button className="btn" onClick={loadRequests}>
-          Load Requests
-        </button>
+        <h3>Subscription Requests</h3>
 
         {requests.map((r) => (
-          <div key={r._id}>
-            <strong>{r.email}</strong>
-            <p>Plan: {r.plan}</p>
+          <div key={r._id} className="game-row">
 
-            <button className="btn btn-view" onClick={() => approve(r._id)}>
-              Activate
+            <span>{r.email}</span>
+
+            <span>{r.plan}</span>
+
+            <button
+              className="btn btn-view"
+              onClick={() => approve(r._id, r.expiryDate)}
+              disabled={r.expiryDate && new Date(r.expiryDate) > new Date()}
+            >
+              {r.expiryDate && new Date(r.expiryDate) > new Date()
+                ? "Active"
+                : "Activate"}
             </button>
+
           </div>
         ))}
       </div>
@@ -215,6 +267,7 @@ export default function Admin() {
       {/* CREATE SLIP */}
 
       <div className="card">
+
         <h3>Create Slip</h3>
 
         <input
@@ -223,7 +276,10 @@ export default function Admin() {
           onChange={(e) => setDate(e.target.value)}
         />
 
-        <select value={access} onChange={(e) => setAccess(e.target.value)}>
+        <select
+          value={access}
+          onChange={(e) => setAccess(e.target.value)}
+        >
           <option value="free">Free</option>
           <option value="weekly">Weekly</option>
           <option value="monthly">Monthly</option>
@@ -232,28 +288,37 @@ export default function Admin() {
 
         {games.map((g, i) => (
           <div key={i} className="game-row">
+
             <input
               placeholder="Home"
               value={g.home}
-              onChange={(e) => updateGame(i, "home", e.target.value)}
+              onChange={(e) =>
+                updateGame(i, "home", e.target.value)
+              }
             />
 
             <input
               placeholder="Away"
               value={g.away}
-              onChange={(e) => updateGame(i, "away", e.target.value)}
+              onChange={(e) =>
+                updateGame(i, "away", e.target.value)
+              }
             />
 
             <input
               placeholder="Odd"
               type="number"
               value={g.odd}
-              onChange={(e) => updateGame(i, "odd", e.target.value)}
+              onChange={(e) =>
+                updateGame(i, "odd", e.target.value)
+              }
             />
 
             <select
               value={g.type}
-              onChange={(e) => updateGame(i, "type", e.target.value)}
+              onChange={(e) =>
+                updateGame(i, "type", e.target.value)
+              }
             >
               <option value="Over">Over</option>
               <option value="Under">Under</option>
@@ -262,8 +327,11 @@ export default function Admin() {
             <input
               placeholder="Line"
               value={g.line}
-              onChange={(e) => updateGame(i, "line", e.target.value)}
+              onChange={(e) =>
+                updateGame(i, "line", e.target.value)
+              }
             />
+
           </div>
         ))}
 
@@ -271,26 +339,42 @@ export default function Admin() {
           Add Game
         </button>
 
-        <button className="btn btn-upgrade" onClick={createSlip}>
+        <button
+          className="btn btn-upgrade"
+          onClick={createSlip}
+        >
           Create Slip
         </button>
+
       </div>
 
       {/* SLIPS */}
 
       <div className="card">
+
         <h3>Slips</h3>
 
         {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
+
             <div className="slip-header">
               <strong>{slip.date}</strong>
+              <span className="plan-badge">
+                {badge(slip.access)}
+              </span>
 
-              <span className="plan-badge">{badge(slip.access)}</span>
+              <button
+                className="btn btn-logout"
+                onClick={() => deleteSlip(slip._id)}
+              >
+                Delete Slip
+              </button>
+
             </div>
 
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
+
                 <span>
                   {g.home} vs {g.away}
                 </span>
@@ -301,20 +385,34 @@ export default function Admin() {
 
                 <span>{g.result || "pending"}</span>
 
-                <button onClick={() => markResult(slip._id, i, "win")}>
+                <button
+                  onClick={() =>
+                    markResult(slip._id, i, "win")
+                  }
+                >
                   Won
                 </button>
 
-                <button onClick={() => markResult(slip._id, i, "lost")}>
+                <button
+                  onClick={() =>
+                    markResult(slip._id, i, "lost")
+                  }
+                >
                   Lost
                 </button>
+
               </div>
             ))}
+
           </div>
         ))}
 
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
+
+          <button
+            disabled={page <= 1}
+            onClick={() => loadSlips(page - 1)}
+          >
             Prev
           </button>
 
@@ -322,9 +420,17 @@ export default function Admin() {
             Page {page} of {pages}
           </span>
 
-          <button onClick={() => loadSlips(page + 1)}>Next</button>
+          <button
+            disabled={page >= pages}
+            onClick={() => loadSlips(page + 1)}
+          >
+            Next
+          </button>
+
         </div>
+
       </div>
+
     </div>
   );
 } 
