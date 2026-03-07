@@ -26,6 +26,7 @@ export default function User() {
       });
 
       const data = await res.json();
+
       if (!data.success || !data.user) {
         logout();
         return;
@@ -75,7 +76,6 @@ export default function User() {
         message: "User requested upgrade",
       }),
     });
-
     alert("Request sent. Send payment message to WhatsApp.");
   }
 
@@ -92,10 +92,8 @@ export default function User() {
       window.location.href = "/login";
       return;
     }
-
     loadProfile();
     loadSlips();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -115,17 +113,14 @@ export default function User() {
         <span className={`plan-badge plan-${user.plan}`}>
           {user.plan.toUpperCase()} PLAN
         </span>
-
         <p>
           Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
         </p>
-
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-
             <select
               value={planSelect}
               onChange={(e) => setPlanSelect(e.target.value)}
@@ -210,18 +205,9 @@ export default function User() {
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
-                                <td>
-                                  {g.home} vs {g.away}
-                                </td>
-
-                                <td>
-                                  {g.overUnder || `${g.type} ${g.line}`}
-                                </td>
-
-                                <td>
-                                  Odd: {Number(g.odds).toFixed(2)}
-                                </td>
-
+                                <td>{g.home} vs {g.away}</td>
+                                <td>{g.overUnder || `${g.type} ${g.line}`}</td>
+                                <td>Odd: {Number(g.odds).toFixed(2)}</td>
                                 <td>
                                   <span className={`result-badge result-${g.result || "pending"}`}>
                                     {g.result || "pending"}
@@ -232,7 +218,9 @@ export default function User() {
                           </tbody>
                         </table>
                       ) : (
-                        <div className="lock-overlay">Premium slip — upgrade to view</div>
+                        <div className="lock-overlay">
+                          Premium slip — upgrade to view
+                        </div>
                       )}
                     </td>
 
@@ -256,9 +244,7 @@ export default function User() {
           <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
             Previous
           </button>
-
           <span>Page {page}</span>
-
           <button className="btn" onClick={() => loadSlips(page + 1)}>
             Next
           </button>
