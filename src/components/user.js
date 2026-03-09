@@ -22,12 +22,14 @@ export default function User() {
       const res = await fetch(`${API}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = await res.json();
 
       if (!data.success || !data.user) {
         logout();
         return;
       }
+
       setUser(data.user);
     } catch {
       logout();
@@ -43,6 +45,7 @@ export default function User() {
       });
 
       const data = await res.json();
+
       setSlips(data.slips || []);
       setPage(newPage);
     } catch {
@@ -52,6 +55,7 @@ export default function User() {
 
   function getRemainingDays() {
     if (!user?.expiresAt) return 0;
+
     return Math.max(
       0,
       Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000)
@@ -92,6 +96,7 @@ export default function User() {
       window.location.href = "/login";
       return;
     }
+
     loadProfile();
     loadSlips();
   }, [token, loadProfile, loadSlips]);
@@ -114,8 +119,12 @@ export default function User() {
         </span>
 
         <p>
-          Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
+          Expires:{" "}
+          {user.expiresAt
+            ? new Date(user.expiresAt).toDateString()
+            : "No expiry"}
         </p>
+
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
@@ -143,6 +152,7 @@ export default function User() {
       </div>
 
       {/* SLIPS TABLE */}
+
       <div className="card">
         <h3>Available Slips</h3>
 
@@ -188,12 +198,36 @@ export default function User() {
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
-                                <td>{g.home} vs {g.away}</td>
-                                <td>{g.overUnder || `${g.type} ${g.line}`}</td>
-                                <td>Odd: {Number(g.odds).toFixed(2)}</td>
+                                <td>
+                                  {g.home} vs {g.away}
+                                </td>
+
                                 <td>
                                   <span
-                                    className={`result-badge result-${g.result || "pending"}`}
+                                    className={`ou-badge ${
+                                      g.overUnder
+                                        ?.toLowerCase()
+                                        .includes("over")
+                                        ? "ou-over"
+                                        : "ou-under"
+                                    }`}
+                                  >
+                                    {g.overUnder || `${g.type} ${g.line}`}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  Odd:{" "}
+                                  <span className="odds">
+                                    {Number(g.odds).toFixed(2)}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  <span
+                                    className={`result-badge result-${
+                                      g.result || "pending"
+                                    }`}
                                   >
                                     {g.result || "pending"}
                                   </span>
@@ -207,11 +241,22 @@ export default function User() {
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
-                                <td>{g.home} vs {g.away}</td>
-                                <td>Odd: {Number(g.odds).toFixed(2)}</td>
+                                <td>
+                                  {g.home} vs {g.away}
+                                </td>
+
+                                <td>
+                                  Odd:{" "}
+                                  <span className="odds">
+                                    {Number(g.odds).toFixed(2)}
+                                  </span>
+                                </td>
+
                                 <td>
                                   <span
-                                    className={`result-badge result-${g.result || "pending"}`}
+                                    className={`result-badge result-${
+                                      g.result || "pending"
+                                    }`}
                                   >
                                     {g.result || "pending"}
                                   </span>
@@ -254,17 +299,24 @@ export default function User() {
           >
             Previous
           </button>
+
           <span>Page {page}</span>
+
           <button className="btn" onClick={() => loadSlips(page + 1)}>
             Next
           </button>
         </div>
       </div>
 
+      {/* MODAL */}
+
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>×</button>
+            <button className="close" onClick={closeSlip}>
+              ×
+            </button>
+
             <h3>{selected.date} - Full Details</h3>
 
             {selected.games?.length ? (
@@ -272,11 +324,35 @@ export default function User() {
                 <tbody>
                   {selected.games.map((g, i) => (
                     <tr key={i}>
-                      <td>{g.home} vs {g.away}</td>
-                      <td>{g.overUnder || `${g.type} ${g.line}`}</td>
-                      <td>Odd: {Number(g.odds).toFixed(2)}</td>
                       <td>
-                        <span className={`result-badge result-${g.result || "pending"}`}>
+                        {g.home} vs {g.away}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`ou-badge ${
+                            g.overUnder?.toLowerCase().includes("over")
+                              ? "ou-over"
+                              : "ou-under"
+                          }`}
+                        >
+                          {g.overUnder || `${g.type} ${g.line}`}
+                        </span>
+                      </td>
+
+                      <td>
+                        Odd:{" "}
+                        <span className="odds">
+                          {Number(g.odds).toFixed(2)}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`result-badge result-${
+                            g.result || "pending"
+                          }`}
+                        >
                           {g.result || "pending"}
                         </span>
                       </td>
