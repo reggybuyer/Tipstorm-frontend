@@ -1,246 +1,216 @@
-body{
+/* GLOBAL */
+body {
   font-family: Arial, Helvetica, sans-serif;
-  background:#0f172a;
-  color:white;
-  margin:0;
+  background: #0f172a;
+  color: white;
+  margin: 0;
 }
-
-.section{
-  padding:20px;
-  max-width:1200px;
-  margin:auto;
+.section {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
 }
-
-h2,h3{
-  margin-bottom:15px;
+h2, h3 {
+  margin-bottom: 15px;
 }
 
 /* HEADER */
-
-.header-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 /* CARDS */
-
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:25px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 /* BUTTONS */
-
-.btn{
-  padding:8px 14px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:600;
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
 }
-
-.btn-view{
-  background:#22c55e;
-  color:white;
+.btn-view {
+  background: #22c55e;
+  color: white;
 }
-
-.btn-view:hover{
-  background:#16a34a;
+.btn-view:hover {
+  background: #16a34a;
 }
-
-.btn-logout{
-  background:#ef4444;
-  color:white;
+.btn-logout {
+  background: #ef4444;
+  color: white;
 }
-
-.btn-logout:hover{
-  background:#dc2626;
+.btn-logout:hover {
+  background: #dc2626;
 }
-
-.btn-upgrade{
-  background:#f59e0b;
-  color:black;
-  margin-top:10px;
+.btn-upgrade {
+  background: #f59e0b;
+  color: black;
+  margin-top: 10px;
 }
-
-.btn-upgrade:hover{
-  background:#d97706;
+.btn-upgrade:hover {
+  background: #d97706;
 }
 
 /* PLAN BADGES */
-
-.plan-badge{
-  padding:4px 10px;
-  border-radius:6px;
-  font-size:12px;
-  font-weight:bold;
+.plan-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
 }
-
-.plan-free{
-  background:#475569;
-}
-
-.plan-weekly{
-  background:#2563eb;
-}
-
-.plan-monthly{
-  background:#9333ea;
-}
-
-.plan-vip{
-  background:#f59e0b;
-  color:black;
-}
+.plan-free { background: #475569; }
+.plan-weekly { background: #2563eb; }
+.plan-monthly { background: #9333ea; }
+.plan-vip { background: #f59e0b; color: black; }
 
 /* TABLES */
-
-.slip-table{
-  width:100%;
-  border-collapse:collapse;
+.slip-table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-.slip-table th{
-  text-align:left;
-  padding:10px;
-  border-bottom:2px solid #334155;
+.slip-table th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #334155;
 }
-
-.slip-table td{
-  padding:10px;
-  border-bottom:1px solid #334155;
+.slip-table td {
+  padding: 10px;
+  border-bottom: 1px solid #334155;
 }
-
-.slip-table tr:hover{
-  background:#334155;
+.slip-table tr:hover {
+  background: #334155;
 }
 
 /* INNER TABLE */
-
-.inner-table{
-  width:100%;
-  border-collapse:collapse;
+.inner-table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-.inner-table td{
-  padding:6px;
-  font-size:14px;
+.inner-table td {
+  padding: 6px;
+  font-size: 14px;
 }
 
 /* ODDS */
-
-.odds{
-  color:#f59e0b;
-  font-weight:700;
-  font-size:15px;
+.odds {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 15px;
 }
 
-/* OVER / UNDER */
-
-.ou-badge{
-  padding:4px 8px;
-  border-radius:6px;
-  font-size:12px;
-  font-weight:bold;
+/* OVER / UNDER BADGES */
+.ou-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
 }
-
-.ou-over{
-  background:#16a34a;
+.ou-over {
+  background-color: #ff4500; /* red/orange for over */
 }
-
-.ou-under{
-  background:#2563eb;
+.ou-under {
+  background-color: #1e90ff; /* blue for under */
 }
 
 /* RESULT BADGE */
-
-.result-badge{
-  padding:3px 8px;
-  border-radius:6px;
-  font-size:12px;
-  font-weight:bold;
+.result-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
 }
-
-.result-win{
-  background:#22c55e;
-}
-
-.result-loss{
-  background:#ef4444;
-}
-
-.result-pending{
-  background:#64748b;
-}
+.result-win { background: #22c55e; }
+.result-loss { background: #ef4444; }
+.result-pending { background: #64748b; }
 
 /* LOCKED SLIP */
-
-.lock-overlay{
-  background:#334155;
-  padding:10px;
-  border-radius:6px;
-  text-align:center;
-  color:#94a3b8;
+.lock-overlay {
+  background: #334155;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  color: #94a3b8;
 }
 
 /* PAGINATION */
-
-.pagination{
-  margin-top:15px;
-  display:flex;
-  gap:10px;
-  align-items:center;
+.pagination {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 /* UPGRADE CARD */
-
-.upgrade-card{
-  margin-top:15px;
+.upgrade-card {
+  margin-top: 15px;
 }
-
-.upgrade-card select{
-  padding:6px;
-  border-radius:6px;
-  border:none;
+.upgrade-card select {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
 }
-
-.amount-display{
-  margin-top:8px;
-  font-size:14px;
+.amount-display {
+  margin-top: 8px;
+  font-size: 14px;
 }
 
 /* MODAL */
-
-.modal{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  background:rgba(0,0,0,0.7);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  width: 500px;
+  max-width: 90%;
+}
+.close {
+  float: right;
+  font-size: 22px;
+  border: none;
+  background: none;
+  color: white;
+  cursor: pointer;
 }
 
-.modal-content{
-  background:#1e293b;
-  padding:20px;
-  border-radius:10px;
-  width:500px;
-  max-width:90%;
+/* ADMIN / USER CARD ROWS */
+.game-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
-
-.close{
-  float:right;
-  font-size:22px;
-  border:none;
-  background:none;
-  color:white;
-  cursor:pointer;
+.slip-card {
+  background: #334155;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+.slip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 } 
