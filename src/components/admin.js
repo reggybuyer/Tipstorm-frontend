@@ -120,11 +120,13 @@ export default function Admin() {
     const body = {
       date,
       access,
-      games: games.map((g) => ({
+      games: games.map((g => ({
         home: g.home,
         away: g.away,
-        odds: parseFloat(g.odd) || 1,
-        overUnder: g.type + " " + (g.line || ""),
+        odds: Number(g.odds),
+        type: g.type,
+        line: g.line
+        overUnder: g.overUnder
         result: "pending",
       })),
     };

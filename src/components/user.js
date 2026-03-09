@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
+const API =
+  process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -38,20 +39,23 @@ export default function User() {
     }
   }, [token]);
 
-  const loadSlips = useCallback(async (newPage = 1) => {
-    try {
-      const res = await fetch(`${API}/slips?page=${newPage}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+  const loadSlips = useCallback(
+    async (newPage = 1) => {
+      try {
+        const res = await fetch(`${API}/slips?page=${newPage}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setSlips(data.slips || []);
-      setPage(newPage);
-    } catch {
-      setSlips([]);
-    }
-  }, [token]);
+        setSlips(data.slips || []);
+        setPage(newPage);
+      } catch {
+        setSlips([]);
+      }
+    },
+    [token]
+  );
 
   function getRemainingDays() {
     if (!user?.expiresAt) return 0;
@@ -73,11 +77,7 @@ export default function User() {
     await fetch(`${API}/request-subscription`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: user.email,
-        plan: planSelect,
-        message: "User requested upgrade",
-      }),
+      body: JSON.stringify({ email: user.email, plan: planSelect }),
     });
 
     alert("Request sent. Send payment message to WhatsApp.");
@@ -113,6 +113,8 @@ export default function User() {
         </button>
       </div>
 
+      {/* USER PLAN CARD */}
+
       <div className="card premium-card">
         <span className={`plan-badge plan-${user.plan}`}>
           {user.plan.toUpperCase()} PLAN
@@ -145,7 +147,7 @@ export default function User() {
             </div>
 
             <button className="btn btn-upgrade" onClick={requestActivation}>
-              Request Upgrade (Send WhatsApp Payment)
+              Request Upgrade
             </button>
           </div>
         )}
@@ -198,9 +200,7 @@ export default function User() {
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
-                                <td>
-                                  {g.home} vs {g.away}
-                                </td>
+                                <td>{g.home} vs {g.away}</td>
 
                                 <td>
                                   <span
@@ -236,39 +236,19 @@ export default function User() {
                             ))}
                           </tbody>
                         </table>
-                      ) : slip.access === "free" ? (
+                      ) : (
                         <table className="inner-table">
                           <tbody>
                             {slip.games?.map((g, i) => (
                               <tr key={i}>
-                                <td>
-                                  {g.home} vs {g.away}
-                                </td>
-
-                                <td>
-                                  Odd:{" "}
-                                  <span className="odds">
-                                    {Number(g.odds).toFixed(2)}
-                                  </span>
-                                </td>
-
-                                <td>
-                                  <span
-                                    className={`result-badge result-${
-                                      g.result || "pending"
-                                    }`}
-                                  >
-                                    {g.result || "pending"}
-                                  </span>
-                                </td>
+                                <td>{g.home} vs {g.away}</td>
+                                <td>🔒 Premium</td>
+                                <td>🔒</td>
+                                <td>🔒</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
-                      ) : (
-                        <div className="lock-overlay">
-                          Premium slip — upgrade to view
-                        </div>
                       )}
                     </td>
 
@@ -324,20 +304,10 @@ export default function User() {
                 <tbody>
                   {selected.games.map((g, i) => (
                     <tr key={i}>
-                      <td>
-                        {g.home} vs {g.away}
-                      </td>
+                      <td>{g.home} vs {g.away}</td>
 
                       <td>
-                        <span
-                          className={`ou-badge ${
-                            g.overUnder?.toLowerCase().includes("over")
-                              ? "ou-over"
-                              : "ou-under"
-                          }`}
-                        >
-                          {g.overUnder || `${g.type} ${g.line}`}
-                        </span>
+                        {g.overUnder || `${g.type} ${g.line}`}
                       </td>
 
                       <td>
@@ -347,15 +317,7 @@ export default function User() {
                         </span>
                       </td>
 
-                      <td>
-                        <span
-                          className={`result-badge result-${
-                            g.result || "pending"
-                          }`}
-                        >
-                          {g.result || "pending"}
-                        </span>
-                      </td>
+                      <td>{g.result || "pending"}</td>
                     </tr>
                   ))}
                 </tbody>
