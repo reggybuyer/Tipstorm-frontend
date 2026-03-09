@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
+const API =
+  process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com/";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -10,6 +11,7 @@ export default function User() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [selected, setSelected] = useState(null);
+
   const token = localStorage.getItem("token");
 
   const logout = () => {
@@ -54,7 +56,10 @@ export default function User() {
 
   const getRemainingDays = () => {
     if (!user?.expiresAt) return 0;
-    return Math.max(0, Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000));
+    return Math.max(
+      0,
+      Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000)
+    );
   };
 
   const getAmount = () => {
@@ -96,18 +101,29 @@ export default function User() {
     <div className="section">
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={logout}>
+          Logout
+        </button>
       </div>
 
+      {/* Premium Info */}
       <div className="card premium-card">
-        <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
-        <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
+        <span className={`plan-badge plan-${user.plan}`}>
+          {user.plan.toUpperCase()} PLAN
+        </span>
+        <p>
+          Expires:{" "}
+          {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
+        </p>
         <p>Remaining: {getRemainingDays()} days</p>
 
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-            <select value={planSelect} onChange={(e) => setPlanSelect(e.target.value)}>
+            <select
+              value={planSelect}
+              onChange={(e) => setPlanSelect(e.target.value)}
+            >
               <option value="weekly">Weekly - Ksh 500</option>
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
@@ -122,6 +138,7 @@ export default function User() {
         )}
       </div>
 
+      {/* Available Slips */}
       <div className="card">
         <h3>Available Slips</h3>
         {slips.length === 0 ? (
@@ -142,10 +159,12 @@ export default function User() {
                 const allowed =
                   slip.access === "free" ||
                   (user?.premium && (user.plan === "vip" || user.plan === slip.access));
-                const totalOdds = slip.games?.reduce(
-                  (acc, g) => acc * (Number(g.odds) || 1),
-                  1
-                );
+
+                const totalOdds = slip.games?.reduce((acc, g) => {
+                  const oddValue = parseFloat(g.odds);
+                  return acc * (isNaN(oddValue) ? 1 : oddValue);
+                }, 1);
+
                 return (
                   <tr key={slip._id}>
                     <td>{slip.date}</td>
@@ -172,7 +191,7 @@ export default function User() {
                                     {g.overUnder || `${g.type} ${g.line}`}
                                   </span>
                                 </td>
-                                <td>Odd: <span className="odds">{Number(g.odds || 0).toFixed(2)}</span></td>
+                                <td>Odd: <span className="odds">{g.odds ? parseFloat(g.odds).toFixed(2) : "-"}</span></td>
                                 <td>
                                   <span className={`result-badge result-${g.result || "pending"}`}>
                                     {g.result || "pending"}
@@ -197,7 +216,7 @@ export default function User() {
                         </table>
                       )}
                     </td>
-                    <td>{totalOdds ? totalOdds.toFixed(2) : "-"}</td>
+                    <td>{slip.games?.length ? totalOdds.toFixed(2) : "-"}</td>
                     <td>
                       {allowed && (
                         <button className="btn btn-view" onClick={() => openSlip(slip)}>
@@ -213,20 +232,31 @@ export default function User() {
         )}
 
         <div className="pagination">
-          <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
+          <button
+            className="btn"
+            onClick={() => loadSlips(page - 1)}
+            disabled={page <= 1}
+          >
             Previous
           </button>
           <span>Page {page} of {pages}</span>
-          <button className="btn" onClick={() => loadSlips(page + 1)} disabled={page >= pages}>
+          <button
+            className="btn"
+            onClick={() => loadSlips(page + 1)}
+            disabled={page >= pages}
+          >
             Next
           </button>
         </div>
       </div>
 
+      {/* Slip Modal */}
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>×</button>
+            <button className="close" onClick={closeSlip}>
+              ×
+            </button>
             <h3>{selected.date} - Full Details</h3>
             {selected.games?.length ? (
               <table className="inner-table">
@@ -237,13 +267,15 @@ export default function User() {
                       <td>
                         <span
                           className={`ou-badge ${
-                            g.overUnder?.toLowerCase().includes("over") ? "ou-over" : "ou-under"
+                            g.overUnder?.toLowerCase().includes("over")
+                              ? "ou-over"
+                              : "ou-under"
                           }`}
                         >
                           {g.overUnder || `${g.type} ${g.line}`}
                         </span>
                       </td>
-                      <td>Odd: <span className="odds">{Number(g.odds || 0).toFixed(2)}</span></td>
+                      <td>Odd: <span className="odds">{g.odds ? parseFloat(g.odds).toFixed(2) : "-"}</span></td>
                       <td>
                         <span className={`result-badge result-${g.result || "pending"}`}>
                           {g.result || "pending"}
