@@ -263,7 +263,7 @@ export default function Admin() {
                 <span>{g.home} vs {g.away}</span>
                 <span>Odd: {g.odds || "🔒"}</span>
                 <span>{g.result || "pending"}</span>
-                <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
+                <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
               </div>
             ))}
