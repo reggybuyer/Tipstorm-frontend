@@ -4,20 +4,17 @@ const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender
 
 export default function Admin() {
   const token = localStorage.getItem("token");
+
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
   const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
-  const [sortBy, setSortBy] = useState("date");
-  const [filterBy, setFilterBy] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
   const limit = 10;
 
-  // Badge for access levels
+  // Badge for slip access type
   const badge = (access) => {
     if (access === "free") return "🟢 FREE";
     if (access === "weekly") return "🟡 WEEKLY";
@@ -26,7 +23,7 @@ export default function Admin() {
     return access;
   };
 
-  // Load users
+  // ---------------- Users ----------------
   const loadUsers = useCallback(async () => {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -35,7 +32,6 @@ export default function Admin() {
     setUsers(data.users || []);
   }, [token]);
 
-  // Delete user
   const deleteUser = useCallback(
     async (id) => {
       if (!window.confirm("Delete this user?")) return;
@@ -48,7 +44,7 @@ export default function Admin() {
     [token, loadUsers]
   );
 
-  // Load subscription requests
+  // ---------------- Subscription Requests ----------------
   const loadRequests = useCallback(async () => {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -57,7 +53,6 @@ export default function Admin() {
     setRequests(data.requests || []);
   }, [token]);
 
-  // Approve subscription
   const approve = useCallback(
     async (id, expiryDate) => {
       if (expiryDate && new Date(expiryDate) > new Date()) {
@@ -66,7 +61,10 @@ export default function Admin() {
       }
       await fetch(`${API}/approve-request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ requestId: id }),
       });
       alert("User activated");
@@ -76,19 +74,17 @@ export default function Admin() {
     [token, loadRequests, loadUsers]
   );
 
-  // Load slips
+  // ---------------- Slips ----------------
   const loadSlips = useCallback(
     async (newPage = 1) => {
       const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
       const data = await res.json();
       setSlips(data.slips || []);
-      setPages(data.pages || 1);
       setPage(newPage);
     },
     [limit]
   );
 
-  // Delete slip
   const deleteSlip = useCallback(
     async (id) => {
       if (!window.confirm("Delete this slip?")) return;
@@ -101,12 +97,14 @@ export default function Admin() {
     [token, loadSlips, page]
   );
 
-  // Mark result
   const markResult = useCallback(
     async (slipId, index, result) => {
       await fetch(`${API}/slip-result`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ slipId, gameIndex: index, result }),
       });
       loadSlips(page);
@@ -114,21 +112,42 @@ export default function Admin() {
     [token, loadSlips, page]
   );
 
-  // Add and update game rows
-  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "", overUnder: "" }]);
+  // ---------------- Create Slip ----------------
+  const addGameRow = () => {
+    setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
+  };
+
   const updateGame = (index, field, value) => {
     const updated = [...games];
     updated[index][field] = value;
     setGames(updated);
   };
 
-  // Create slip
   const createSlip = async () => {
-    if (!games.length) return alert("Add at least one game");
-    const body = { date, access, games: games.map((g) => ({ ...g, odds: Number(g.odd), result: "pending", overUnder: g.overUnder || g.type })) };
+    if (!games.length) {
+      alert("Add at least one game");
+      return;
+    }
+
+    const body = {
+      date,
+      access,
+      games: games.map((g) => ({
+        home: g.home,
+        away: g.away,
+        odds: Number(g.odd),
+        type: g.type,
+        line: g.line,
+        result: "pending",
+      })),
+    };
+
     const res = await fetch(`${API}/slips`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json();
@@ -137,18 +156,18 @@ export default function Admin() {
       setGames([]);
       setDate("");
       loadSlips(page);
-    } else alert("Failed to create slip");
+    } else {
+      alert("Failed to create slip");
+    }
   };
 
-  // Filter, search, sort slips
-  const filteredSlips = slips
-    .filter((s) => filterBy === "all" || s.access === filterBy)
-    .filter((s) => !searchQuery || s.date.includes(searchQuery) || s.games.some((g) => g.home.includes(searchQuery) || g.away.includes(searchQuery)))
-    .sort((a, b) => (sortBy === "date" ? new Date(b.date) - new Date(a.date) : a.access.localeCompare(b.access)));
-
-  // Initial load
+  // ---------------- Init ----------------
   useEffect(() => {
-    if (localStorage.getItem("role") !== "admin") window.location.href = "/admin-login";
+    const role = localStorage.getItem("role");
+    if (role !== "admin") {
+      window.location.href = "/admin-login";
+      return;
+    }
     loadUsers();
     loadRequests();
     loadSlips(1);
@@ -156,9 +175,18 @@ export default function Admin() {
 
   return (
     <div className="section">
+      {/* Header */}
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={() => { localStorage.clear(); window.location.href = "/"; }}>Logout</button>
+        <button
+          className="btn btn-logout"
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "/";
+          }}
+        >
+          Logout
+        </button>
       </div>
 
       {/* Users */}
@@ -181,7 +209,11 @@ export default function Admin() {
           <div key={r._id} className="game-row">
             <span>{r.email}</span>
             <span>{r.plan}</span>
-            <button className="btn btn-view" onClick={() => approve(r._id, r.expiryDate)} disabled={r.expiryDate && new Date(r.expiryDate) > new Date()}>
+            <button
+              className="btn btn-view"
+              onClick={() => approve(r._id, r.expiryDate)}
+              disabled={r.expiryDate && new Date(r.expiryDate) > new Date()}
+            >
               {r.expiryDate && new Date(r.expiryDate) > new Date() ? "Active" : "Activate"}
             </button>
           </div>
@@ -198,15 +230,20 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
+
         {games.map((g, i) => (
           <div key={i} className="game-row">
             <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
             <input placeholder="Away" value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} />
             <input placeholder="Odd" type="number" step="0.01" value={g.odd} onChange={(e) => updateGame(i, "odd", e.target.value)} />
-            <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}><option value="Over">Over</option><option value="Under">Under</option></select>
+            <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
+              <option value="Over">Over</option>
+              <option value="Under">Under</option>
+            </select>
             <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
           </div>
         ))}
+
         <button className="btn" onClick={addGameRow}>Add Game</button>
         <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
       </div>
@@ -214,7 +251,7 @@ export default function Admin() {
       {/* Slips */}
       <div className="card">
         <h3>Slips</h3>
-        {filteredSlips.map((slip) => (
+        {slips.map((slip) => (
           <div key={slip._id} className="slip-card">
             <div className="slip-header">
               <strong>{slip.date}</strong>
@@ -224,7 +261,6 @@ export default function Admin() {
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
-                <span>{g.overUnder || "🔒 Premium"}</span>
                 <span>Odd: {g.odds || "🔒"}</span>
                 <span>{g.result || "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
@@ -233,6 +269,13 @@ export default function Admin() {
             ))}
           </div>
         ))}
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
+          <span>Page {page}</span>
+          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>Next</button>
+        </div>
       </div>
     </div>
   );
