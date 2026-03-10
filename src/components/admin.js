@@ -11,6 +11,7 @@ export default function Admin() {
   const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
+  const [totalOdds, setTotalOdds] = useState(1);
   const token = localStorage.getItem("token");
   const limit = 10;
 
@@ -91,13 +92,36 @@ export default function Admin() {
   function updateGame(index, field, value) {
     const updated = [...games];
     updated[index][field] = value;
+
+    // Update overUnder automatically if type changes
+    if (field === "type") updated[index].overUnder = value;
+
     setGames(updated);
+
+    // Calculate total odds live
+    const odds = updated.reduce((acc, g) => {
+      const o = parseFloat(g.odd);
+      return acc * (isNaN(o) ? 1 : o);
+    }, 1);
+    setTotalOdds(odds);
   }
 
   async function createSlip() {
     if (!games.length) {
       alert("Add at least one game");
       return;
+    }
+
+    // Validate all odds
+    for (const g of games) {
+      if (!g.home || !g.away || !g.odd) {
+        alert("All games must have Home, Away, and Odds filled");
+        return;
+      }
+      if (isNaN(g.odd) || parseFloat(g.odd) <= 0) {
+        alert("Odds must be a positive number");
+        return;
+      }
     }
 
     const body = {
@@ -122,12 +146,12 @@ export default function Admin() {
       },
       body: JSON.stringify(body),
     });
-
     const data = await res.json();
     if (data.success) {
       alert("Slip created");
       setGames([]);
       setDate("");
+      setTotalOdds(1);
       loadSlips(page);
     } else {
       alert("Failed to create slip");
@@ -161,11 +185,7 @@ export default function Admin() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        slipId,
-        gameIndex: index,
-        result,
-      }),
+      body: JSON.stringify({ slipId, gameIndex: index, result }),
     });
     loadSlips(page);
   }
@@ -230,7 +250,9 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
-
+        <div>
+          Total Odds: <strong>{totalOdds.toFixed(2)}</strong>
+        </div>
         {games.map((g, i) => (
           <div key={i} className="game-row">
             <input
@@ -247,8 +269,8 @@ export default function Admin() {
               placeholder="Odd"
               type="number"
               step="0.01"
-              value={g.odds}
-              onChange={(e) => updateGame(i, "odds", e.target.value)}
+              value={g.odd}
+              onChange={(e) => updateGame(i, "odd", e.target.value)}
             />
             <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
               <option value="Over">Over</option>
@@ -261,7 +283,6 @@ export default function Admin() {
             />
           </div>
         ))}
-
         <button className="btn" onClick={addGameRow}>
           Add Game
         </button>
@@ -282,7 +303,6 @@ export default function Admin() {
                 Delete Slip
               </button>
             </div>
-
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
@@ -295,7 +315,6 @@ export default function Admin() {
             ))}
           </div>
         ))}
-
         <div className="pagination">
           <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
             Prev
