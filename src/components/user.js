@@ -19,10 +19,16 @@ export default function User() {
     try {
       const res = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (!data.success || !data.user) { logout(); return; }
+      if (!data.success || !data.user) {
+        logout();
+        return;
+      }
       setUser(data.user);
-    } catch { logout(); }
-    finally { setLoading(false); }
+    } catch {
+      logout();
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
   // Load slips
@@ -31,7 +37,9 @@ export default function User() {
       const res = await fetch(`${API}/slips`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setSlips(data.slips || []);
-    } catch { setSlips([]); }
+    } catch {
+      setSlips([]);
+    }
   }, [token]);
 
   const getRemainingDays = () => {
@@ -56,7 +64,10 @@ export default function User() {
   };
 
   useEffect(() => {
-    if (!token) { window.location.href = "/login"; return; }
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
     loadProfile();
     loadSlips();
   }, [token, loadProfile, loadSlips]);
@@ -125,14 +136,17 @@ export default function User() {
                       {allowed ? (
                         slip.games?.map((g, i) => (
                           <div key={i}>
-                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line || "-"}
+                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} |
+                            Result: {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
                           </div>
                         ))
                       ) : (
                         <div>🔒 Premium</div>
                       )}
                     </td>
-                    <td>{(slip.totalOdds || slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1)).toFixed(2)}</td>
+                    <td>
+                      {(slip.totalOdds || slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1)).toFixed(2)}
+                    </td>
                   </tr>
                 );
               })}
