@@ -275,7 +275,7 @@ export default function Admin() {
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
                 <span>{g.overUnder || "🔒 Premium"}</span>
-                <span>Odd: {g.odds || "🔒"}</span>
+                <span>Odd: {parseFloat(g.odds).toFixed(2) || "🔒"}</span>
                 <span>{g.result || "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
