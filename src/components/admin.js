@@ -13,6 +13,7 @@ export default function Admin() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  // Badge display
   const badge = (access) => {
     if (access === "free") return "🟢 FREE";
     if (access === "weekly") return "🟡 WEEKLY";
@@ -21,24 +22,28 @@ export default function Admin() {
     return access;
   };
 
+  // Load users
   const loadUsers = useCallback(async () => {
     const res = await fetch(`${API}/all-users`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     setUsers(data.users || []);
   }, [token]);
 
+  // Delete user
   const deleteUser = useCallback(async (id) => {
     if (!window.confirm("Delete this user?")) return;
     await fetch(`${API}/delete-user/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     loadUsers();
   }, [token, loadUsers]);
 
+  // Load subscription requests
   const loadRequests = useCallback(async () => {
     const res = await fetch(`${API}/subscription-requests`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     setRequests(data.requests || []);
   }, [token]);
 
+  // Approve subscription
   const approve = useCallback(async (id, expiryDate) => {
     if (expiryDate && new Date(expiryDate) > new Date()) {
       alert("User is still active. Cannot re-activate before expiry.");
@@ -54,6 +59,7 @@ export default function Admin() {
     loadUsers();
   }, [token, loadRequests, loadUsers]);
 
+  // Load slips
   const loadSlips = useCallback(async (newPage = 1) => {
     const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
     const data = await res.json();
@@ -61,12 +67,14 @@ export default function Admin() {
     setPage(newPage);
   }, [limit]);
 
+  // Delete slip
   const deleteSlip = useCallback(async (id) => {
     if (!window.confirm("Delete this slip?")) return;
     await fetch(`${API}/delete-slip/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     loadSlips(page);
   }, [token, loadSlips, page]);
 
+  // Mark result
   const markResult = useCallback(async (slipId, index, result) => {
     await fetch(`${API}/slip-result`, {
       method: "POST",
@@ -76,15 +84,21 @@ export default function Admin() {
     loadSlips(page);
   }, [token, loadSlips, page]);
 
-  const calculateTotalOdds = (games) => games.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1).toFixed(2);
+  // Calculate total odds
+  const calculateTotalOdds = (games) => {
+    return games.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1).toFixed(2);
+  };
 
-  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "", line: "" }]);
+  // Add game row
+  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
+
   const updateGame = (index, field, value) => {
     const updated = [...games];
     updated[index][field] = value;
     setGames(updated);
   };
 
+  // Create slip
   const createSlip = async () => {
     if (!games.length) { alert("Add at least one game"); return; }
 
@@ -107,17 +121,17 @@ export default function Admin() {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
+
     const data = await res.json();
     if (data.success) {
       alert("Slip created");
       setGames([]);
       setDate("");
       loadSlips(page);
-    } else {
-      alert("Failed to create slip");
-    }
+    } else alert("Failed to create slip");
   };
 
+  // Logout
   const logout = () => { localStorage.clear(); window.location.href = "/"; };
 
   useEffect(() => {
@@ -166,7 +180,7 @@ export default function Admin() {
         ))}
       </div>
 
-      {/* Create Slip */}
+      {/* Create Slip Table */}
       <div className="card">
         <h3>Create Slip</h3>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -176,25 +190,35 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
-        {games.map((g, i) => (
-          <div key={i} className="game-row">
-            <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
-            <input placeholder="Away" value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} />
-            <input
-              placeholder="Odd"
-              type="number"
-              step="0.01"
-              value={g.odd}
-              onChange={(e) => updateGame(i, "odd", e.target.value)}
-            />
-            <input
-              placeholder="Type (Over/Under)"
-              value={g.type}
-              onChange={(e) => updateGame(i, "type", e.target.value)}
-            />
-            <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
-          </div>
-        ))}
+
+        <table className="slip-create-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Home</th><th>Away</th><th>Odd</th><th>Type</th><th>Line</th><th>Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            {games.map((g, i) => (
+              <tr key={i}>
+                <td>{i + 1}</td>
+                <td><input value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} /></td>
+                <td><input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} /></td>
+                <td><input type="number" step="0.01" value={g.odd} onChange={(e) => updateGame(i, "odd", e.target.value)} /></td>
+                <td>
+                  <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
+                    <option value="Over">Over</option>
+                    <option value="Under">Under</option>
+                  </select>
+                </td>
+                <td><input value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} /></td>
+                <td>
+                  <button onClick={() => { const updated = [...games]; updated.splice(i,1); setGames(updated); }}>Remove</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
         <button className="btn" onClick={addGameRow}>Add Game</button>
         <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
       </div>
@@ -207,25 +231,24 @@ export default function Admin() {
             <div className="slip-header">
               <strong>{slip.date}</strong>
               <span className="plan-badge">{badge(slip.access)}</span>
-              <span>Total Odds: {(parseFloat(slip.totalOdds) || 0).toFixed(2)}</span>
+              <span>Total Odds: {parseFloat(slip.totalOdds).toFixed(2)}</span>
               <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>Delete Slip</button>
             </div>
-
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
-                <span>Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type} | Line: {g.line || "-"}</span>
+                <span>Odd: {(parseFloat(g.odds)||1).toFixed(2)} | {g.type} {g.line}</span>
                 <span>{g.result === "won" ? "✅" : g.result === "lost" ? "❌" : "pending"}</span>
-                <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
-                <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
+                <button onClick={() => markResult(slip._id,i,"won")}>Won</button>
+                <button onClick={() => markResult(slip._id,i,"lost")}>Lost</button>
               </div>
             ))}
           </div>
         ))}
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
+          <button disabled={page<=1} onClick={()=>loadSlips(page-1)}>Prev</button>
           <span>Page {page}</span>
-          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>Next</button>
+          <button disabled={slips.length<limit} onClick={()=>loadSlips(page+1)}>Next</button>
         </div>
       </div>
     </div>
