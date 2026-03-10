@@ -2,303 +2,181 @@ import React, { useEffect, useState, useCallback } from "react";
 
 const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
-export default function User() {
-  const [slips, setSlips] = useState([]);
-  const [user, setUser] = useState(null);
-  const [planSelect, setPlanSelect] = useState("weekly");
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [selected, setSelected] = useState(null);
+export default function User(){
 
-  const token = localStorage.getItem("token");
+const [slips,setSlips]=useState([]);
+const [user,setUser]=useState(null);
+const [planSelect,setPlanSelect]=useState("weekly");
+const [loading,setLoading]=useState(true);
+const [page,setPage]=useState(1);
+const [pages,setPages]=useState(1);
 
-  const logout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+const token=localStorage.getItem("token");
 
-  // Load user profile
-  const loadProfile = useCallback(async () => {
-    try {
-      const res = await fetch(`${API}/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+const logout=()=>{
+localStorage.clear();
+window.location.href="/login";
+};
 
-      const data = await res.json();
+const loadProfile=useCallback(async()=>{
 
-      if (!data.success || !data.user) {
-        logout();
-        return;
-      }
+try{
 
-      setUser(data.user);
-    } catch {
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+const res=await fetch(`${API}/profile`,{
+headers:{Authorization:`Bearer ${token}`}
+});
 
-  // Load slips
-  const loadSlips = useCallback(async (newPage = 1) => {
-    try {
-      const res = await fetch(`${API}/slips?page=${newPage}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+const data=await res.json();
 
-      const data = await res.json();
+if(!data.success){
+logout();
+return;
+}
 
-      setSlips(data.slips || []);
-      setPages(data.pages || 1);
-      setPage(newPage);
-    } catch {
-      setSlips([]);
-    }
-  }, [token]);
+setUser(data.user);
 
-  const getRemainingDays = () => {
-    if (!user?.expiresAt) return 0;
-    return Math.max(
-      0,
-      Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000)
-    );
-  };
+}catch{
 
-  const getAmount = () => {
-    if (planSelect === "weekly") return 500;
-    if (planSelect === "monthly") return 1000;
-    if (planSelect === "vip") return 1500;
-    return 0;
-  };
+logout();
 
-  const requestActivation = async () => {
-    await fetch(`${API}/request-subscription`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: user.email,
-        plan: planSelect,
-        message: "User requested upgrade"
-      })
-    });
+}finally{
 
-    alert("Request sent. Send payment confirmation to WhatsApp.");
-  };
+setLoading(false);
 
-  const openSlip = (slip) => {
-    setSelected({ ...slip, games: slip.games || [] });
-  };
+}
 
-  const closeSlip = () => setSelected(null);
+},[token]);
 
-  useEffect(() => {
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
+const loadSlips=useCallback(async(newPage=1)=>{
 
-    loadProfile();
-    loadSlips();
-  }, [token, loadProfile, loadSlips]);
+const res=await fetch(`${API}/slips?page=${newPage}`);
 
-  if (loading) return <div className="section">Loading...</div>;
-  if (!user) return <div className="section">Session expired.</div>;
+const data=await res.json();
 
-  return (
-    <div className="section">
+setSlips(data.slips||[]);
+setPages(data.pages||1);
+setPage(newPage);
 
-      {/* Header */}
-      <div className="header-row">
-        <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>
-          Logout
-        </button>
-      </div>
+},[]);
 
-      {/* Plan */}
-      <div className="card premium-card">
-        <span className={`plan-badge plan-${user.plan}`}>
-          {user.plan?.toUpperCase()} PLAN
-        </span>
+const getAmount=()=>{
 
-        <p>
-          Expires:{" "}
-          {user.expiresAt
-            ? new Date(user.expiresAt).toDateString()
-            : "No expiry"}
-        </p>
+if(planSelect==="weekly") return 500;
+if(planSelect==="monthly") return 1000;
+if(planSelect==="vip") return 1500;
 
-        <p>Remaining: {getRemainingDays()} days</p>
+return 0;
+};
 
-        {/* Upgrade */}
-        {user.plan !== "vip" && (
-          <div className="upgrade-card">
+const requestActivation=async()=>{
 
-            <h4>Upgrade your plan</h4>
+await fetch(`${API}/request-subscription`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:user.email,
+plan:planSelect
+})
+});
 
-            <select
-              value={planSelect}
-              onChange={(e) => setPlanSelect(e.target.value)}
-            >
-              <option value="weekly">Weekly - Ksh 500</option>
-              <option value="monthly">Monthly - Ksh 1000</option>
-              <option value="vip">VIP - Ksh 1500</option>
-            </select>
+alert("Send payment confirmation to WhatsApp 0789906001");
 
-            <div className="amount-display">
-              Amount: <strong>Ksh {getAmount()}</strong>
-            </div>
+};
 
-            <div className="manual-payment">
-              <p>Playbill: <strong>625625</strong></p>
-              <p>Acc Number: <strong>20170457</strong></p>
-              <p>
-                Send your <strong>{user.email}</strong> and payment confirmation
-                to WhatsApp: <strong>0789906001</strong>
-              </p>
-            </div>
+useEffect(()=>{
 
-            <button className="btn btn-upgrade" onClick={requestActivation}>
-              Request Upgrade
-            </button>
+if(!token){
+window.location.href="/login";
+return;
+}
 
-          </div>
-        )}
-      </div>
+loadProfile();
+loadSlips();
 
-      {/* Slips */}
-      <div className="card">
+},[token,loadProfile,loadSlips]);
 
-        <h3>Available Slips</h3>
+if(loading) return <div>Loading...</div>;
 
-        {slips.length === 0 ? (
-          <p>No slips available</p>
-        ) : (
-          <table className="slip-table">
+return(
 
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Access</th>
-                <th>Games</th>
-                <th>Total Odds</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+<div className="section">
 
-            <tbody>
-              {slips.map((slip) => {
+<h2>Welcome {user.email}</h2>
 
-                const allowed =
-                  slip.access === "free" ||
-                  (user?.premium &&
-                    (user.plan === "vip" || user.plan === slip.access));
+<button onClick={logout}>Logout</button>
 
-                const totalOdds = (slip.games || []).reduce(
-                  (acc, g) => acc * (parseFloat(g?.odds) || 1),
-                  1
-                );
+<div className="card">
 
-                return (
-                  <tr key={slip._id}>
+<h3>Your Plan {user.plan}</h3>
 
-                    <td>{slip.date}</td>
+<select
+value={planSelect}
+onChange={e=>setPlanSelect(e.target.value)}
+>
 
-                    <td>
-                      <span className={`plan-badge plan-${slip.access}`}>
-                        {slip.access?.toUpperCase()}
-                      </span>
-                    </td>
+<option value="weekly">Weekly 500</option>
+<option value="monthly">Monthly 1000</option>
+<option value="vip">VIP 1500</option>
 
-                    <td>
-                      <table className="inner-table">
-                        <tbody>
+</select>
 
-                          {(slip.games || []).map((g, i) => (
-                            <tr key={i}>
-                              <td>{g.home} vs {g.away}</td>
+<p>Amount Ksh {getAmount()}</p>
 
-                              <td>
-                                {allowed ? (
-                                  <>
-                                    {g.type || "-"} {g.line || ""}
-                                  </>
-                                ) : (
-                                  "🔒 Premium"
-                                )}
-                              </td>
+<p>Paybill 625625</p>
 
-                              <td>
-                                {allowed
-                                  ? `Odd: ${(parseFloat(g?.odds) || 1).toFixed(2)}`
-                                  : "🔒"}
-                              </td>
+<p>Account 20170457</p>
 
-                              <td>
-                                {allowed
-                                  ? g.result === "won"
-                                    ? "✅"
-                                    : g.result === "lost"
-                                    ? "❌"
-                                    : "pending"
-                                  : "🔒"}
-                              </td>
-                            </tr>
-                          ))}
+<p>Send confirmation to WhatsApp 0789906001</p>
 
-                        </tbody>
-                      </table>
-                    </td>
+<button onClick={requestActivation}>
+Request Upgrade
+</button>
 
-                    <td>{allowed ? totalOdds.toFixed(2) : "🔒"}</td>
+</div>
 
-                    <td>
-                      {allowed && (
-                        <button
-                          className="btn btn-view"
-                          onClick={() => openSlip(slip)}
-                        >
-                          View
-                        </button>
-                      )}
-                    </td>
+<div className="card">
 
-                  </tr>
-                );
-              })}
-            </tbody>
+<h3>Available Slips</h3>
 
-          </table>
-        )}
+{slips.map(slip=>{
 
-        {/* Pagination */}
-        <div className="pagination">
+const totalOdds=(slip.games||[])
+.reduce((acc,g)=>acc*(parseFloat(g.odds)||1),1);
 
-          <button
-            className="btn"
-            onClick={() => loadSlips(page - 1)}
-            disabled={page <= 1}
-          >
-            Previous
-          </button>
+return(
 
-          <span>
-            Page {page} of {pages}
-          </span>
+<div key={slip._id}>
 
-          <button
-            className="btn"
-            onClick={() => loadSlips(page + 1)}
-            disabled={page >= pages}
-          >
-            Next
-          </button>
+<h4>{slip.date}</h4>
 
-        </div>
+<p>{slip.access}</p>
 
-      </div>
+<p>Total Odds {totalOdds.toFixed(2)}</p>
 
-    </div>
-  );
+{slip.games?.map((g,i)=>(
+<div key={i}>
+
+<span>{g.home} vs {g.away}</span>
+
+<span>Odd {(parseFloat(g.odds)||1).toFixed(2)}</span>
+
+<span>
+{g.result==="won"?"✅":g.result==="lost"?"❌":"pending"}
+</span>
+
+</div>
+))}
+
+</div>
+
+);
+
+})}
+
+</div>
+
+</div>
+
+);
+
 } 
