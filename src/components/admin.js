@@ -4,6 +4,7 @@ const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender
 
 export default function Admin() {
   const token = localStorage.getItem("token");
+
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
@@ -24,65 +25,90 @@ export default function Admin() {
 
   // Load users
   const loadUsers = useCallback(async () => {
-    const res = await fetch(`${API}/all-users`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API}/all-users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = await res.json();
     setUsers(data.users || []);
   }, [token]);
 
   // Delete user
-  const deleteUser = useCallback(async (id) => {
-    if (!window.confirm("Delete this user?")) return;
-    await fetch(`${API}/delete-user/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-    loadUsers();
-  }, [token, loadUsers]);
+  const deleteUser = useCallback(
+    async (id) => {
+      if (!window.confirm("Delete this user?")) return;
+      await fetch(`${API}/delete-user/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      loadUsers();
+    },
+    [token, loadUsers]
+  );
 
   // Load subscription requests
   const loadRequests = useCallback(async () => {
-    const res = await fetch(`${API}/subscription-requests`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API}/subscription-requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = await res.json();
     setRequests(data.requests || []);
   }, [token]);
 
   // Approve subscription
-  const approve = useCallback(async (id, expiryDate) => {
-    if (expiryDate && new Date(expiryDate) > new Date()) {
-      alert("User is still active. Cannot re-activate before expiry.");
-      return;
-    }
-    await fetch(`${API}/approve-request`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ requestId: id }),
-    });
-    alert("User activated");
-    loadRequests();
-    loadUsers();
-  }, [token, loadRequests, loadUsers]);
+  const approve = useCallback(
+    async (id, expiryDate) => {
+      if (expiryDate && new Date(expiryDate) > new Date()) {
+        alert("User is still active. Cannot re-activate before expiry.");
+        return;
+      }
+      await fetch(`${API}/approve-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ requestId: id }),
+      });
+      alert("User activated");
+      loadRequests();
+      loadUsers();
+    },
+    [token, loadRequests, loadUsers]
+  );
 
   // Load slips
-  const loadSlips = useCallback(async (newPage = 1) => {
-    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-    const data = await res.json();
-    setSlips(data.slips || []);
-    setPage(newPage);
-  }, [limit]);
+  const loadSlips = useCallback(
+    async (newPage = 1) => {
+      const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+      const data = await res.json();
+      setSlips(data.slips || []);
+      setPage(newPage);
+    },
+    [limit]
+  );
 
   // Delete slip
-  const deleteSlip = useCallback(async (id) => {
-    if (!window.confirm("Delete this slip?")) return;
-    await fetch(`${API}/delete-slip/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-    loadSlips(page);
-  }, [token, loadSlips, page]);
+  const deleteSlip = useCallback(
+    async (id) => {
+      if (!window.confirm("Delete this slip?")) return;
+      await fetch(`${API}/delete-slip/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      loadSlips(page);
+    },
+    [token, loadSlips, page]
+  );
 
   // Mark result
-  const markResult = useCallback(async (slipId, index, result) => {
-    await fetch(`${API}/slip-result`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ slipId, gameIndex: index, result }),
-    });
-    loadSlips(page);
-  }, [token, loadSlips, page]);
+  const markResult = useCallback(
+    async (slipId, index, result) => {
+      await fetch(`${API}/slip-result`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ slipId, gameIndex: index, result }),
+      });
+      loadSlips(page);
+    },
+    [token, loadSlips, page]
+  );
 
   // Calculate total odds
   const calculateTotalOdds = (games) => {
@@ -90,7 +116,8 @@ export default function Admin() {
   };
 
   // Add game
-  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "", line: "" }]);
+  const addGameRow = () =>
+    setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
 
   const updateGame = (index, field, value) => {
     const updated = [...games];
@@ -104,7 +131,6 @@ export default function Admin() {
       alert("Add at least one game");
       return;
     }
-
     const body = {
       date,
       access,
@@ -113,7 +139,7 @@ export default function Admin() {
         home: g.home,
         away: g.away,
         odds: parseFloat(g.odd) || 1,
-        type: g.type ? g.type.trim().charAt(0).toUpperCase() + g.type.trim().slice(1).toLowerCase() : "Over",
+        type: g.type ? g.type.charAt(0).toUpperCase() + g.type.slice(1).toLowerCase() : "Over",
         line: g.line,
         result: "pending",
       })),
@@ -135,6 +161,12 @@ export default function Admin() {
     }
   };
 
+  // Admin logout
+  const logout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   useEffect(() => {
     const role = localStorage.getItem("role");
     if (role !== "admin") {
@@ -145,12 +177,6 @@ export default function Admin() {
     loadRequests();
     loadSlips(1);
   }, [loadUsers, loadRequests, loadSlips]);
-
-  // Admin logout
-  const logout = () => {
-    localStorage.clear();
-    window.location.href = "/";
-  };
 
   return (
     <div className="section">
@@ -200,6 +226,7 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
+
         {games.map((g, i) => (
           <div key={i} className="game-row">
             <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
@@ -219,6 +246,7 @@ export default function Admin() {
             <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
           </div>
         ))}
+
         <button className="btn" onClick={addGameRow}>Add Game</button>
         <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
       </div>
@@ -231,13 +259,14 @@ export default function Admin() {
             <div className="slip-header">
               <strong>{slip.date}</strong>
               <span className="plan-badge">{badge(slip.access)}</span>
-              <span>Total Odds: {(parseFloat(slip.totalOdds) || 1).toFixed(2)}</span>
+              <span>Total Odds: {parseFloat(slip.totalOdds).toFixed(2)}</span>
               <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>Delete Slip</button>
             </div>
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
                 <span>Odd: {(parseFloat(g.odds) || 1).toFixed(2)}</span>
+                <span>{g.type}</span>
                 <span>{g.result === "won" ? "✅" : g.result === "lost" ? "❌" : "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>

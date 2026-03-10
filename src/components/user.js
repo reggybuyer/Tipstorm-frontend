@@ -31,7 +31,7 @@ export default function User() {
     }
   }, [token]);
 
-  // Load slips
+  // Load all slips created by Admin
   const loadSlips = useCallback(async () => {
     try {
       const res = await fetch(`${API}/slips`, { headers: { Authorization: `Bearer ${token}` } });
@@ -87,7 +87,6 @@ export default function User() {
         <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
         <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
         <p>Remaining: {getRemainingDays()} days</p>
-
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
@@ -124,7 +123,10 @@ export default function User() {
             </thead>
             <tbody>
               {slips.map((slip) => {
-                const allowed = slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+                const allowed =
+                  slip.access === "free" ||
+                  (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+
                 const totalOdds = slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1) || 0;
 
                 return (
@@ -136,7 +138,7 @@ export default function User() {
                     <td>
                       {allowed ? slip.games?.map((g, i) => (
                         <div key={i}>
-                          {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type ? g.type.trim().charAt(0).toUpperCase() + g.type.trim().slice(1).toLowerCase() : "Over"}
+                          {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type}
                         </div>
                       )) : <div>🔒 Premium</div>}
                     </td>
