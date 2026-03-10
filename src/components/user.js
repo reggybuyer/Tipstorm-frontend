@@ -17,7 +17,9 @@ export default function User() {
   // Load user profile
   const loadProfile = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (!data.success || !data.user) {
         logout();
@@ -31,10 +33,12 @@ export default function User() {
     }
   }, [token]);
 
-  // Load all slips created by Admin
+  // Load slips
   const loadSlips = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/slips`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/slips`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       setSlips(data.slips || []);
     } catch {
@@ -79,7 +83,9 @@ export default function User() {
     <div className="section">
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       {/* User Plan */}
@@ -87,6 +93,7 @@ export default function User() {
         <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
         <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
         <p>Remaining: {getRemainingDays()} days</p>
+
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
@@ -95,13 +102,19 @@ export default function User() {
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
-            <div className="amount-display">Amount: <strong>Ksh {getAmount()}</strong></div>
+            <div className="amount-display">
+              Amount: <strong>Ksh {getAmount()}</strong>
+            </div>
             <div className="manual-payment">
               <p>Playbill: <strong>625625</strong></p>
               <p>Acc Number: <strong>20170457</strong></p>
-              <p>Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong></p>
+              <p>
+                Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong>
+              </p>
             </div>
-            <button className="btn btn-upgrade" onClick={requestActivation}>Request Upgrade</button>
+            <button className="btn btn-upgrade" onClick={requestActivation}>
+              Request Upgrade
+            </button>
           </div>
         )}
       </div>
@@ -124,11 +137,7 @@ export default function User() {
             <tbody>
               {slips.map((slip) => {
                 const allowed =
-                  slip.access === "free" ||
-                  (user?.premium && (user.plan === "vip" || user.plan === slip.access));
-
-                const totalOdds = slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1) || 0;
-
+                  slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
                 return (
                   <tr key={slip._id}>
                     <td>{slip.date}</td>
@@ -136,13 +145,17 @@ export default function User() {
                       <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>
                     </td>
                     <td>
-                      {allowed ? slip.games?.map((g, i) => (
-                        <div key={i}>
-                          {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type}
-                        </div>
-                      )) : <div>🔒 Premium</div>}
+                      {allowed ? (
+                        slip.games?.map((g, i) => (
+                          <div key={i}>
+                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line}
+                          </div>
+                        ))
+                      ) : (
+                        <div>🔒 Premium</div>
+                      )}
                     </td>
-                    <td>{totalOdds.toFixed(2)}</td>
+                    <td>{(slip.totalOdds || slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1)).toFixed(2)}</td>
                   </tr>
                 );
               })}

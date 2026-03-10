@@ -4,7 +4,6 @@ const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender
 
 export default function Admin() {
   const token = localStorage.getItem("token");
-
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
@@ -115,10 +114,8 @@ export default function Admin() {
     return games.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1).toFixed(2);
   };
 
-  // Add game
-  const addGameRow = () =>
-    setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
-
+  // Add game row
+  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "", line: "" }]);
   const updateGame = (index, field, value) => {
     const updated = [...games];
     updated[index][field] = value;
@@ -131,16 +128,17 @@ export default function Admin() {
       alert("Add at least one game");
       return;
     }
+
     const body = {
       date,
       access,
       totalOdds: calculateTotalOdds(games),
       games: games.map((g) => ({
-        home: g.home,
-        away: g.away,
+        home: g.home || "Team A",
+        away: g.away || "Team B",
         odds: parseFloat(g.odd) || 1,
         type: g.type ? g.type.charAt(0).toUpperCase() + g.type.slice(1).toLowerCase() : "Over",
-        line: g.line,
+        line: g.line || "",
         result: "pending",
       })),
     };
@@ -150,6 +148,7 @@ export default function Admin() {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
+
     const data = await res.json();
     if (data.success) {
       alert("Slip created");
@@ -182,7 +181,9 @@ export default function Admin() {
     <div className="section">
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       {/* Users */}
@@ -193,7 +194,9 @@ export default function Admin() {
             <span>{u.email}</span>
             <span className="plan-badge">{u.plan}</span>
             <span>Expiry: {u.expiresAt ? new Date(u.expiresAt).toDateString() : "No expiry"}</span>
-            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>Delete</button>
+            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>
+              Delete
+            </button>
           </div>
         ))}
       </div>
@@ -247,8 +250,12 @@ export default function Admin() {
           </div>
         ))}
 
-        <button className="btn" onClick={addGameRow}>Add Game</button>
-        <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
+        <button className="btn" onClick={addGameRow}>
+          Add Game
+        </button>
+        <button className="btn btn-upgrade" onClick={createSlip}>
+          Create Slip
+        </button>
       </div>
 
       {/* Slips */}
@@ -260,13 +267,19 @@ export default function Admin() {
               <strong>{slip.date}</strong>
               <span className="plan-badge">{badge(slip.access)}</span>
               <span>Total Odds: {parseFloat(slip.totalOdds).toFixed(2)}</span>
-              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>Delete Slip</button>
+              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>
+                Delete Slip
+              </button>
             </div>
+
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
-                <span>{g.home} vs {g.away}</span>
-                <span>Odd: {(parseFloat(g.odds) || 1).toFixed(2)}</span>
-                <span>{g.type}</span>
+                <span>
+                  {g.home} vs {g.away}
+                </span>
+                <span>
+                  Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line}
+                </span>
                 <span>{g.result === "won" ? "✅" : g.result === "lost" ? "❌" : "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
@@ -274,10 +287,15 @@ export default function Admin() {
             ))}
           </div>
         ))}
+
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
+            Prev
+          </button>
           <span>Page {page}</span>
-          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>Next</button>
+          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>
+            Next
+          </button>
         </div>
       </div>
     </div>
