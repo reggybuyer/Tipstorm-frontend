@@ -13,7 +13,6 @@ export default function Admin() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Badge display
   const badge = (access) => {
     if (access === "free") return "🟢 FREE";
     if (access === "weekly") return "🟡 WEEKLY";
@@ -22,99 +21,63 @@ export default function Admin() {
     return access;
   };
 
-  // Load users
   const loadUsers = useCallback(async () => {
-    const res = await fetch(`${API}/all-users`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(`${API}/all-users`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     setUsers(data.users || []);
   }, [token]);
 
-  // Delete user
-  const deleteUser = useCallback(
-    async (id) => {
-      if (!window.confirm("Delete this user?")) return;
-      await fetch(`${API}/delete-user/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      loadUsers();
-    },
-    [token, loadUsers]
-  );
+  const deleteUser = useCallback(async (id) => {
+    if (!window.confirm("Delete this user?")) return;
+    await fetch(`${API}/delete-user/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    loadUsers();
+  }, [token, loadUsers]);
 
-  // Load subscription requests
   const loadRequests = useCallback(async () => {
-    const res = await fetch(`${API}/subscription-requests`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(`${API}/subscription-requests`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     setRequests(data.requests || []);
   }, [token]);
 
-  // Approve subscription
-  const approve = useCallback(
-    async (id, expiryDate) => {
-      if (expiryDate && new Date(expiryDate) > new Date()) {
-        alert("User is still active. Cannot re-activate before expiry.");
-        return;
-      }
-      await fetch(`${API}/approve-request`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ requestId: id }),
-      });
-      alert("User activated");
-      loadRequests();
-      loadUsers();
-    },
-    [token, loadRequests, loadUsers]
-  );
+  const approve = useCallback(async (id, expiryDate) => {
+    if (expiryDate && new Date(expiryDate) > new Date()) {
+      alert("User is still active. Cannot re-activate before expiry.");
+      return;
+    }
+    await fetch(`${API}/approve-request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ requestId: id }),
+    });
+    alert("User activated");
+    loadRequests();
+    loadUsers();
+  }, [token, loadRequests, loadUsers]);
 
-  // Load slips
-  const loadSlips = useCallback(
-    async (newPage = 1) => {
-      const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-      const data = await res.json();
-      setSlips(data.slips || []);
-      setPage(newPage);
-    },
-    [limit]
-  );
+  const loadSlips = useCallback(async (newPage = 1) => {
+    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+    const data = await res.json();
+    setSlips(data.slips || []);
+    setPage(newPage);
+  }, [limit]);
 
-  // Delete slip
-  const deleteSlip = useCallback(
-    async (id) => {
-      if (!window.confirm("Delete this slip?")) return;
-      await fetch(`${API}/delete-slip/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      loadSlips(page);
-    },
-    [token, loadSlips, page]
-  );
+  const deleteSlip = useCallback(async (id) => {
+    if (!window.confirm("Delete this slip?")) return;
+    await fetch(`${API}/delete-slip/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    loadSlips(page);
+  }, [token, loadSlips, page]);
 
-  // Mark result
-  const markResult = useCallback(
-    async (slipId, index, result) => {
-      await fetch(`${API}/slip-result`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ slipId, gameIndex: index, result }),
-      });
-      loadSlips(page);
-    },
-    [token, loadSlips, page]
-  );
+  const markResult = useCallback(async (slipId, index, result) => {
+    await fetch(`${API}/slip-result`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ slipId, gameIndex: index, result }),
+    });
+    loadSlips(page);
+  }, [token, loadSlips, page]);
 
-  // Calculate total odds
-  const calculateTotalOdds = (games) => {
-    return games.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1).toFixed(2);
-  };
+  const calculateTotalOdds = (games) => games.reduce((acc, g) => acc * (parseFloat(g.odd) || 1), 1).toFixed(2);
 
-  // Add game row
   const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "", line: "" }]);
   const updateGame = (index, field, value) => {
     const updated = [...games];
@@ -122,12 +85,8 @@ export default function Admin() {
     setGames(updated);
   };
 
-  // Create slip
   const createSlip = async () => {
-    if (!games.length) {
-      alert("Add at least one game");
-      return;
-    }
+    if (!games.length) { alert("Add at least one game"); return; }
 
     const body = {
       date,
@@ -148,7 +107,6 @@ export default function Admin() {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
-
     const data = await res.json();
     if (data.success) {
       alert("Slip created");
@@ -160,18 +118,11 @@ export default function Admin() {
     }
   };
 
-  // Admin logout
-  const logout = () => {
-    localStorage.clear();
-    window.location.href = "/";
-  };
+  const logout = () => { localStorage.clear(); window.location.href = "/"; };
 
   useEffect(() => {
     const role = localStorage.getItem("role");
-    if (role !== "admin") {
-      window.location.href = "/admin-login";
-      return;
-    }
+    if (role !== "admin") { window.location.href = "/admin-login"; return; }
     loadUsers();
     loadRequests();
     loadSlips(1);
@@ -181,9 +132,7 @@ export default function Admin() {
     <div className="section">
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={logout}>
-          Logout
-        </button>
+        <button className="btn btn-logout" onClick={logout}>Logout</button>
       </div>
 
       {/* Users */}
@@ -194,9 +143,7 @@ export default function Admin() {
             <span>{u.email}</span>
             <span className="plan-badge">{u.plan}</span>
             <span>Expiry: {u.expiresAt ? new Date(u.expiresAt).toDateString() : "No expiry"}</span>
-            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>
-              Delete
-            </button>
+            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>Delete</button>
           </div>
         ))}
       </div>
@@ -229,7 +176,6 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
-
         {games.map((g, i) => (
           <div key={i} className="game-row">
             <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
@@ -249,13 +195,8 @@ export default function Admin() {
             <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
           </div>
         ))}
-
-        <button className="btn" onClick={addGameRow}>
-          Add Game
-        </button>
-        <button className="btn btn-upgrade" onClick={createSlip}>
-          Create Slip
-        </button>
+        <button className="btn" onClick={addGameRow}>Add Game</button>
+        <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
       </div>
 
       {/* Slips */}
@@ -266,20 +207,14 @@ export default function Admin() {
             <div className="slip-header">
               <strong>{slip.date}</strong>
               <span className="plan-badge">{badge(slip.access)}</span>
-              <span>Total Odds: {parseFloat(slip.totalOdds).toFixed(2)}</span>
-              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>
-                Delete Slip
-              </button>
+              <span>Total Odds: {(parseFloat(slip.totalOdds) || 0).toFixed(2)}</span>
+              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>Delete Slip</button>
             </div>
 
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
-                <span>
-                  {g.home} vs {g.away}
-                </span>
-                <span>
-                  Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line}
-                </span>
+                <span>{g.home} vs {g.away}</span>
+                <span>Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type} | Line: {g.line || "-"}</span>
                 <span>{g.result === "won" ? "✅" : g.result === "lost" ? "❌" : "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
@@ -287,15 +222,10 @@ export default function Admin() {
             ))}
           </div>
         ))}
-
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
-            Prev
-          </button>
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
           <span>Page {page}</span>
-          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>
-            Next
-          </button>
+          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>Next</button>
         </div>
       </div>
     </div>

@@ -17,33 +17,21 @@ export default function User() {
   // Load user profile
   const loadProfile = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (!data.success || !data.user) {
-        logout();
-        return;
-      }
+      if (!data.success || !data.user) { logout(); return; }
       setUser(data.user);
-    } catch {
-      logout();
-    } finally {
-      setLoading(false);
-    }
+    } catch { logout(); }
+    finally { setLoading(false); }
   }, [token]);
 
   // Load slips
   const loadSlips = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/slips`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(`${API}/slips`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setSlips(data.slips || []);
-    } catch {
-      setSlips([]);
-    }
+    } catch { setSlips([]); }
   }, [token]);
 
   const getRemainingDays = () => {
@@ -68,10 +56,7 @@ export default function User() {
   };
 
   useEffect(() => {
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
+    if (!token) { window.location.href = "/login"; return; }
     loadProfile();
     loadSlips();
   }, [token, loadProfile, loadSlips]);
@@ -83,9 +68,7 @@ export default function User() {
     <div className="section">
       <div className="header-row">
         <h2>Welcome, {user.email}</h2>
-        <button className="btn btn-logout" onClick={logout}>
-          Logout
-        </button>
+        <button className="btn btn-logout" onClick={logout}>Logout</button>
       </div>
 
       {/* User Plan */}
@@ -102,9 +85,7 @@ export default function User() {
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
             </select>
-            <div className="amount-display">
-              Amount: <strong>Ksh {getAmount()}</strong>
-            </div>
+            <div className="amount-display">Amount: <strong>Ksh {getAmount()}</strong></div>
             <div className="manual-payment">
               <p>Playbill: <strong>625625</strong></p>
               <p>Acc Number: <strong>20170457</strong></p>
@@ -112,9 +93,7 @@ export default function User() {
                 Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong>
               </p>
             </div>
-            <button className="btn btn-upgrade" onClick={requestActivation}>
-              Request Upgrade
-            </button>
+            <button className="btn btn-upgrade" onClick={requestActivation}>Request Upgrade</button>
           </div>
         )}
       </div>
@@ -141,14 +120,12 @@ export default function User() {
                 return (
                   <tr key={slip._id}>
                     <td>{slip.date}</td>
-                    <td>
-                      <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>
-                    </td>
+                    <td><span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span></td>
                     <td>
                       {allowed ? (
                         slip.games?.map((g, i) => (
                           <div key={i}>
-                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line}
+                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} {g.line || "-"}
                           </div>
                         ))
                       ) : (
