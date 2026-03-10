@@ -7,7 +7,6 @@ export default function User() {
   const [user, setUser] = useState(null);
   const [planSelect, setPlanSelect] = useState("weekly");
   const [loading, setLoading] = useState(true);
-
   const token = localStorage.getItem("token");
 
   const logout = () => {
@@ -137,7 +136,7 @@ export default function User() {
                     <td>
                       {allowed ? slip.games?.map((g, i) => (
                         <div key={i}>
-                          {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)}
+                          {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | Type: {g.type ? g.type.trim().charAt(0).toUpperCase() + g.type.trim().slice(1).toLowerCase() : "Over"}
                         </div>
                       )) : <div>🔒 Premium</div>}
                     </td>
