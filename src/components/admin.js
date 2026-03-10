@@ -3,40 +3,41 @@ import React, { useEffect, useState } from "react";
 const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function Admin() {
+  const token = localStorage.getItem("token");
+
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+
+  // Create Slip states
   const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
-  const [totalOdds, setTotalOdds] = useState(1);
-  const token = localStorage.getItem("token");
   const limit = 10;
 
+  /* ==================== HELPERS ==================== */
+  const badge = (access) => {
+    if (access === "free") return "🟢 FREE";
+    if (access === "weekly") return "🟡 WEEKLY";
+    if (access === "monthly") return "🟠 MONTHLY";
+    if (access === "vip") return "🔴 VIP";
+    return access;
+  };
+
+  /* ==================== INITIAL LOAD ==================== */
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role !== "admin") {
+    if (localStorage.getItem("role") !== "admin") {
       window.location.href = "/admin-login";
       return;
     }
     loadUsers();
     loadRequests();
     loadSlips(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ================= BADGE ================= */
-  function badge(access) {
-    if (access === "free") return "🟢 FREE";
-    if (access === "weekly") return "🟡 WEEKLY";
-    if (access === "monthly") return "🟠 MONTHLY";
-    if (access === "vip") return "🔴 VIP";
-    return access;
-  }
-
-  /* ================= USERS ================= */
+  /* ==================== USERS ==================== */
   async function loadUsers() {
     const res = await fetch(`${API}/all-users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -54,7 +55,7 @@ export default function Admin() {
     loadUsers();
   }
 
-  /* ================= REQUESTS ================= */
+  /* ==================== REQUESTS ==================== */
   async function loadRequests() {
     const res = await fetch(`${API}/subscription-requests`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -63,7 +64,7 @@ export default function Admin() {
     setRequests(data.requests || []);
   }
 
-  async function approve(id, expiryDate) {
+  async function approveRequest(id, expiryDate) {
     if (expiryDate && new Date(expiryDate) > new Date()) {
       alert("User is still active. Cannot re-activate before expiry.");
       return;
@@ -81,63 +82,73 @@ export default function Admin() {
     loadUsers();
   }
 
-  /* ================= CREATE SLIP ================= */
-  function addGameRow() {
-    setGames([
-      ...games,
-      { home: "", away: "", odd: "", type: "Over", line: "", overUnder: "" },
-    ]);
+  /* ==================== SLIPS ==================== */
+  async function loadSlips(newPage = 1) {
+    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
+    const data = await res.json();
+    setSlips(data.slips || []);
+    setPages(data.pages || 1);
+    setPage(newPage);
+  }
+
+  async function deleteSlip(id) {
+    if (!window.confirm("Delete this slip?")) return;
+    await fetch(`${API}/delete-slip/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    loadSlips(page);
+  }
+
+  async function markResult(slipId, index, result) {
+    await fetch(`${API}/slip-result`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ slipId, gameIndex: index, result }),
+    });
+    loadSlips(page);
+  }
+
+  /* ==================== CREATE SLIP ==================== */
+  function addGame() {
+    setGames([...games, { home: "", away: "", odds: "", type: "Over", line: "" }]);
   }
 
   function updateGame(index, field, value) {
     const updated = [...games];
     updated[index][field] = value;
-
-    // Update overUnder automatically if type changes
-    if (field === "type") updated[index].overUnder = value;
-
     setGames(updated);
-
-    // Calculate total odds live
-    const odds = updated.reduce((acc, g) => {
-      const o = parseFloat(g.odd);
-      return acc * (isNaN(o) ? 1 : o);
-    }, 1);
-    setTotalOdds(odds);
   }
 
+  const totalOdds = games.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1);
+
   async function createSlip() {
-    if (!games.length) {
-      alert("Add at least one game");
+    if (!date || games.length === 0) {
+      alert("Date and at least one game are required");
       return;
     }
-
-    // Validate all odds
-    for (const g of games) {
-      if (!g.home || !g.away || !g.odd) {
-        alert("All games must have Home, Away, and Odds filled");
-        return;
-      }
-      if (isNaN(g.odd) || parseFloat(g.odd) <= 0) {
-        alert("Odds must be a positive number");
+    for (let g of games) {
+      if (!g.home || !g.away || !g.odds) {
+        alert("All game fields are required");
         return;
       }
     }
-
     const body = {
       date,
       access,
       games: games.map((g) => ({
         home: g.home,
         away: g.away,
-        odds: Number(g.odd),
+        odds: Number(g.odds),
         type: g.type,
         line: g.line,
-        overUnder: g.overUnder || g.type,
+        overUnder: g.type,
         result: "pending",
       })),
     };
-
     const res = await fetch(`${API}/slips`, {
       method: "POST",
       headers: {
@@ -151,45 +162,11 @@ export default function Admin() {
       alert("Slip created");
       setGames([]);
       setDate("");
-      setTotalOdds(1);
       loadSlips(page);
-    } else {
-      alert("Failed to create slip");
-    }
+    } else alert("Failed to create slip");
   }
 
-  /* ================= LOAD SLIPS ================= */
-  async function loadSlips(newPage = 1) {
-    const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`);
-    const data = await res.json();
-    setSlips(data.slips || []);
-    setPages(data.pages || 1);
-    setPage(newPage);
-  }
-
-  /* ================= DELETE SLIP ================= */
-  async function deleteSlip(id) {
-    if (!window.confirm("Delete this slip?")) return;
-    await fetch(`${API}/delete-slip/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    loadSlips(page);
-  }
-
-  /* ================= RESULT UPDATE ================= */
-  async function markResult(slipId, index, result) {
-    await fetch(`${API}/slip-result`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ slipId, gameIndex: index, result }),
-    });
-    loadSlips(page);
-  }
-
+  /* ==================== RENDER ==================== */
   return (
     <div className="section">
       <div className="header-row">
@@ -212,10 +189,8 @@ export default function Admin() {
           <div key={u._id} className="game-row">
             <span>{u.email}</span>
             <span className="plan-badge">{u.plan}</span>
-            <span>
-              Expiry: {u.expiresAt ? new Date(u.expiresAt).toDateString() : "No expiry"}
-            </span>
-            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>
+            <span>Expiry: {u.expiresAt ? new Date(u.expiresAt).toDateString() : "No expiry"}</span>
+            <button className="btn btn-delete" onClick={() => deleteUser(u._id)}>
               Delete
             </button>
           </div>
@@ -230,8 +205,8 @@ export default function Admin() {
             <span>{r.email}</span>
             <span>{r.plan}</span>
             <button
-              className="btn btn-view"
-              onClick={() => approve(r._id, r.expiryDate)}
+              className="btn btn-approve"
+              onClick={() => approveRequest(r._id, r.expiryDate)}
               disabled={r.expiryDate && new Date(r.expiryDate) > new Date()}
             >
               {r.expiryDate && new Date(r.expiryDate) > new Date() ? "Active" : "Activate"}
@@ -250,40 +225,26 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
-        <div>
-          Total Odds: <strong>{totalOdds.toFixed(2)}</strong>
-        </div>
         {games.map((g, i) => (
           <div key={i} className="game-row">
-            <input
-              placeholder="Home"
-              value={g.home}
-              onChange={(e) => updateGame(i, "home", e.target.value)}
-            />
-            <input
-              placeholder="Away"
-              value={g.away}
-              onChange={(e) => updateGame(i, "away", e.target.value)}
-            />
+            <input placeholder="Home" value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
+            <input placeholder="Away" value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} />
             <input
               placeholder="Odd"
               type="number"
               step="0.01"
-              value={g.odd}
-              onChange={(e) => updateGame(i, "odd", e.target.value)}
+              value={g.odds}
+              onChange={(e) => updateGame(i, "odds", e.target.value)}
             />
             <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
               <option value="Over">Over</option>
               <option value="Under">Under</option>
             </select>
-            <input
-              placeholder="Line"
-              value={g.line}
-              onChange={(e) => updateGame(i, "line", e.target.value)}
-            />
+            <input placeholder="Line" value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} />
           </div>
         ))}
-        <button className="btn" onClick={addGameRow}>
+        <div>Total Odds: {totalOdds.toFixed(2)}</div>
+        <button className="btn" onClick={addGame}>
           Add Game
         </button>
         <button className="btn btn-upgrade" onClick={createSlip}>
@@ -299,14 +260,16 @@ export default function Admin() {
             <div className="slip-header">
               <strong>{slip.date}</strong>
               <span className="plan-badge">{badge(slip.access)}</span>
-              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>
+              <button className="btn btn-delete" onClick={() => deleteSlip(slip._id)}>
                 Delete Slip
               </button>
             </div>
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
-                <span>{g.home} vs {g.away}</span>
-                <span>{g.overUnder || "🔒 Premium"}</span>
+                <span>
+                  {g.home} vs {g.away}
+                </span>
+                <span>{g.overUnder || "🔒"}</span>
                 <span>Odd: {g.odds || "🔒"}</span>
                 <span>{g.result || "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "win")}>Won</button>
