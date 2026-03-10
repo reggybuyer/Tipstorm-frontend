@@ -246,8 +246,9 @@ export default function Admin() {
             <input
               placeholder="Odd"
               type="number"
-              value={g.odd}
-              onChange={(e) => updateGame(i, "odd", e.target.value)}
+              step="0.01"
+              value={g.odds}
+              onChange={(e) => updateGame(i, "odds", e.target.value)}
             />
             <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
               <option value="Over">Over</option>
