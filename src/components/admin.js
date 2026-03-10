@@ -98,7 +98,7 @@ export default function Admin() {
 
   // ---------------- Total Odds Engine ----------------
   const calculateTotalOdds = (games) => {
-    return games.reduce((acc, g) => acc * parseFloat(g.odds || 1), 1).toFixed(2);
+    return games.reduce((acc, g) => acc * parseFloat(g.odd || 1), 1).toFixed(2);
   };
 
   // ---------------- Create Slip ----------------
@@ -117,9 +117,7 @@ export default function Admin() {
       alert("Add at least one game");
       return;
     }
-
     const totalOdds = calculateTotalOdds(games);
-
     const body = {
       date,
       access,
@@ -127,13 +125,12 @@ export default function Admin() {
       games: games.map((g) => ({
         home: g.home,
         away: g.away,
-        odds: Number(g.odd),
+        odd: Number(g.odd), // per game odd
         type: g.type,
         line: g.line,
         result: "pending",
       })),
     };
-
     const res = await fetch(`${API}/slips`, {
       method: "POST",
       headers: {
@@ -142,7 +139,6 @@ export default function Admin() {
       },
       body: JSON.stringify(body),
     });
-
     const data = await res.json();
     if (data.success) {
       alert("Slip created");
@@ -248,7 +244,7 @@ export default function Admin() {
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
-                <span>Odd: {parseFloat(g.odds).toFixed(2) || "🔒"}</span>
+                <span>Odd: {parseFloat(g.odd).toFixed(2) || "🔒"}</span>
                 <span>{g.result || "pending"}</span>
                 <button onClick={() => markResult(slip._id, i, "won")}>Won</button>
                 <button onClick={() => markResult(slip._id, i, "lost")}>Lost</button>

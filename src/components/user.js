@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API =
-  process.env.REACT_APP_API_BASE ||
-  "https://tipstorm-backend.onrender.com";
+const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -37,29 +35,23 @@ export default function User() {
     }
   }, [token]);
 
-  const loadSlips = useCallback(
-    async (newPage = 1) => {
-      try {
-        const res = await fetch(`${API}/slips?page=${newPage}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        setSlips(data.slips || []);
-        setPages(data.pages || 1);
-        setPage(newPage);
-      } catch {
-        setSlips([]);
-      }
-    },
-    [token]
-  );
+  const loadSlips = useCallback(async (newPage = 1) => {
+    try {
+      const res = await fetch(`${API}/slips?page=${newPage}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      setSlips(data.slips || []);
+      setPages(data.pages || 1);
+      setPage(newPage);
+    } catch {
+      setSlips([]);
+    }
+  }, [token]);
 
   const getRemainingDays = () => {
     if (!user?.expiresAt) return 0;
-    return Math.max(
-      0,
-      Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000)
-    );
+    return Math.max(0, Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000));
   };
 
   const getAmount = () => {
@@ -84,6 +76,10 @@ export default function User() {
 
   const openSlip = (slip) => setSelected({ ...slip, games: slip.games || [] });
   const closeSlip = () => setSelected(null);
+
+  const calculateTotalOdds = (games) => {
+    return games.reduce((acc, g) => acc * parseFloat(g.odd || 1), 1).toFixed(2);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -112,10 +108,7 @@ export default function User() {
           {user.plan.toUpperCase()} PLAN
         </span>
         <p>
-          Expires:{" "}
-          {user.expiresAt
-            ? new Date(user.expiresAt).toDateString()
-            : "No expiry"}
+          Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}
         </p>
         <p>Remaining: {getRemainingDays()} days</p>
 
@@ -123,10 +116,7 @@ export default function User() {
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
-            <select
-              value={planSelect}
-              onChange={(e) => setPlanSelect(e.target.value)}
-            >
+            <select value={planSelect} onChange={(e) => setPlanSelect(e.target.value)}>
               <option value="weekly">Weekly - Ksh 500</option>
               <option value="monthly">Monthly - Ksh 1000</option>
               <option value="vip">VIP - Ksh 1500</option>
@@ -134,8 +124,6 @@ export default function User() {
             <div className="amount-display">
               Amount: <strong>Ksh {getAmount()}</strong>
             </div>
-
-            {/* Manual Payment Instructions */}
             <div className="manual-payment">
               <p>Playbill: <strong>625625</strong></p>
               <p>Acc Number: <strong>20170457</strong></p>
@@ -143,11 +131,7 @@ export default function User() {
                 Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong>
               </p>
             </div>
-
-            <button
-              className="btn btn-upgrade"
-              onClick={requestActivation}
-            >
+            <button className="btn btn-upgrade" onClick={requestActivation}>
               Request Upgrade
             </button>
           </div>
@@ -174,12 +158,10 @@ export default function User() {
               {slips.map((slip) => {
                 const allowed =
                   slip.access === "free" ||
-                  (user?.premium &&
-                    (user.plan === "vip" || user.plan === slip.access));
-                const totalOdds = slip.games?.reduce((acc, g) => {
-                  const odd = parseFloat(g.odds);
-                  return acc * (isNaN(odd) ? 1 : odd);
-                }, 1);
+                  (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+
+                const totalOdds = calculateTotalOdds(slip.games || []);
+
                 return (
                   <tr key={slip._id}>
                     <td>{slip.date}</td>
@@ -201,7 +183,7 @@ export default function User() {
                                   </span>
                                 </td>
                                 <td>
-                                  Odd: <span className="odds">{(parseFloat(g.odds) || 1).toFixed(2)}</span>
+                                  Odd: <span className="odds">{parseFloat(g.odd).toFixed(2)}</span>
                                 </td>
                                 <td>
                                   <span className={`result-badge result-${g.result || "pending"}`}>
@@ -227,13 +209,10 @@ export default function User() {
                         </table>
                       )}
                     </td>
-                    <td>{slip.games?.length ? totalOdds.toFixed(2) : "-"}</td>
+                    <td>{slip.games?.length ? totalOdds : "-"}</td>
                     <td>
                       {allowed && (
-                        <button
-                          className="btn btn-view"
-                          onClick={() => openSlip(slip)}
-                        >
+                        <button className="btn btn-view" onClick={() => openSlip(slip)}>
                           View
                         </button>
                       )}
@@ -244,23 +223,12 @@ export default function User() {
             </tbody>
           </table>
         )}
-
         <div className="pagination">
-          <button
-            className="btn"
-            onClick={() => loadSlips(page - 1)}
-            disabled={page <= 1}
-          >
+          <button className="btn" onClick={() => loadSlips(page - 1)} disabled={page <= 1}>
             Previous
           </button>
-          <span>
-            Page {page} of {pages}
-          </span>
-          <button
-            className="btn"
-            onClick={() => loadSlips(page + 1)}
-            disabled={page >= pages}
-          >
+          <span>Page {page} of {pages}</span>
+          <button className="btn" onClick={() => loadSlips(page + 1)} disabled={page >= pages}>
             Next
           </button>
         </div>
@@ -270,9 +238,7 @@ export default function User() {
       {selected && (
         <div className="modal">
           <div className="modal-content">
-            <button className="close" onClick={closeSlip}>
-              ×
-            </button>
+            <button className="close" onClick={closeSlip}>×</button>
             <h3>{selected.date} - Full Details</h3>
             <table className="inner-table">
               <tbody>
@@ -284,9 +250,7 @@ export default function User() {
                         {g.overUnder || `${g.type} ${g.line}`}
                       </span>
                     </td>
-                    <td>
-                      Odd: <span className="odds">{(parseFloat(g.odds) || 1).toFixed(2)}</span>
-                    </td>
+                    <td>Odd: <span className="odds">{parseFloat(g.odd).toFixed(2)}</span></td>
                     <td>
                       <span className={`result-badge result-${g.result || "pending"}`}>
                         {g.result || "pending"}
