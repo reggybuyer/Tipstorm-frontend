@@ -8,8 +8,6 @@ const [slips,setSlips]=useState([]);
 const [user,setUser]=useState(null);
 const [planSelect,setPlanSelect]=useState("weekly");
 const [loading,setLoading]=useState(true);
-const [page,setPage]=useState(1);
-const [pages,setPages]=useState(1);
 
 const token=localStorage.getItem("token");
 
@@ -47,15 +45,12 @@ setLoading(false);
 
 },[token]);
 
-const loadSlips=useCallback(async(newPage=1)=>{
+const loadSlips=useCallback(async()=>{
 
-const res=await fetch(`${API}/slips?page=${newPage}`);
-
+const res=await fetch(`${API}/slips`);
 const data=await res.json();
 
 setSlips(data.slips||[]);
-setPages(data.pages||1);
-setPage(newPage);
 
 },[]);
 
@@ -114,9 +109,9 @@ value={planSelect}
 onChange={e=>setPlanSelect(e.target.value)}
 >
 
-<option value="weekly">Weekly 500</option>
-<option value="monthly">Monthly 1000</option>
-<option value="vip">VIP 1500</option>
+<option value="weekly">Weekly - 500</option>
+<option value="monthly">Monthly - 1000</option>
+<option value="vip">VIP - 1500</option>
 
 </select>
 
