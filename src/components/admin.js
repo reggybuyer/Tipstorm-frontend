@@ -90,7 +90,7 @@ export default function Admin() {
   };
 
   // Add game row
-  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "Over", line: "" }]);
+  const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "", line: "" }]);
 
   const updateGame = (index, field, value) => {
     const updated = [...games];
@@ -99,73 +99,34 @@ export default function Admin() {
   };
 
   // Create slip
-  <div className="card">
-  <h3>Create Slip</h3>
-  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-  <select value={access} onChange={(e) => setAccess(e.target.value)}>
-    <option value="free">Free</option>
-    <option value="weekly">Weekly</option>
-    <option value="monthly">Monthly</option>
-    <option value="vip">VIP</option>
-  </select>
-
-  <table className="slip-create-table">
-    <thead>
-      <tr>
-        <th>Home</th>
-        <th>Away</th>
-        <th>Odd</th>
-        <th>Type</th>
-        <th>Line</th>
-        <th>Remove</th>
-      </tr>
-    </thead>
-    <tbody>
-      {games.map((g, i) => (
-        <tr key={i}>
-          <td>
-            <input value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} placeholder="Home" />
-          </td>
-          <td>
-            <input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} placeholder="Away" />
-          </td>
-          <td>
-            <input
-              type="number"
-              step="0.01"
-              value={g.odd}
-              onChange={(e) => updateGame(i, "odd", e.target.value)}
-              placeholder="Odd"
-            />
-          </td>
-          <td>
-            <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
-              <option value="Over">Over</option>
-              <option value="Under">Under</option>
-            </select>
-          </td>
-          <td>
-            <input value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} placeholder="Line" />
-          </td>
-          <td>
-            <button onClick={() => {
-              const updated = [...games];
-              updated.splice(i,1);
-              setGames(updated);
-            }}>Remove</button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-
-  <div className="slip-footer">
-    <strong>Total Odds: {calculateTotalOdds(games)}</strong>
-    <button className="btn" onClick={addGameRow}>Add Game</button>
-    <button className="btn btn-upgrade" onClick={createSlip}>Create Slip</button>
-  </div>
-</div> 
-
+  const createSlip = async () => {
+    if (!games.length) { alert("Add at least one game"); return; }
+    const body = {
+      date,
+      access,
+      totalOdds: calculateTotalOdds(games),
+      games: games.map((g) => ({
+        home: g.home || "Team A",
+        away: g.away || "Team B",
+        odds: parseFloat(g.odd) || 1,
+        type: g.type ? g.type.charAt(0).toUpperCase() + g.type.slice(1).toLowerCase() : "Over",
+        line: g.line || "",
+        result: "pending",
+      })),
+    };
+    const res = await fetch(`${API}/slips`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("Slip created");
+      setGames([]);
+      setDate("");
+      loadSlips(page);
+    } else alert("Failed to create slip");
+  };
 
   // Logout
   const logout = () => { localStorage.clear(); window.location.href = "/"; };
@@ -241,10 +202,13 @@ export default function Admin() {
                 <td><input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} /></td>
                 <td><input type="number" step="0.01" value={g.odd} onChange={(e) => updateGame(i, "odd", e.target.value)} /></td>
                 <td>
-                  <select value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)}>
-                    <option value="Over">Over</option>
-                    <option value="Under">Under</option>
-                  </select>
+                  <input
+                    type="text"
+                    value={g.type}
+                    onChange={(e) => updateGame(i, "type", e.target.value)}
+                    placeholder="Over/Under"
+                    style={{ width: '80px' }}
+                  />
                 </td>
                 <td><input value={g.line} onChange={(e) => updateGame(i, "line", e.target.value)} /></td>
                 <td>
