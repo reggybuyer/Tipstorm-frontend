@@ -115,43 +115,50 @@ export default function User() {
         {slips.length === 0 ? (
           <p>No slips available</p>
         ) : (
-          <table className="slip-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Access</th>
-                <th>Games</th>
-                <th>Total Odds</th>
-              </tr>
-            </thead>
-            <tbody>
-              {slips.map((slip) => {
-                const allowed =
-                  slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
-                return (
-                  <tr key={slip._id}>
-                    <td>{slip.date}</td>
-                    <td><span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span></td>
-                    <td>
-                      {allowed ? (
-                        slip.games?.map((g, i) => (
-                          <div key={i}>
-                            {g.home} vs {g.away} | Odd: {(parseFloat(g.odds) || 1).toFixed(2)} | {g.type} |
-                            Result: {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
-                          </div>
-                        ))
-                      ) : (
-                        <div>🔒 Premium</div>
-                      )}
-                    </td>
-                    <td>
-                      {(slip.totalOdds || slip.games?.reduce((acc, g) => acc * (parseFloat(g.odds) || 1), 1)).toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          slips.map((slip) => {
+            const allowed =
+              slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+            return (
+              <div key={slip._id} className="slip-card">
+                <div className="slip-header">
+                  <strong>{slip.date}</strong>{" "}
+                  <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>{" "}
+                  <span>Total Odds: {(slip.totalOdds || 1).toFixed(2)}</span>
+                </div>
+
+                {allowed ? (
+                  <table className="slip-games-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Home</th>
+                        <th>Away</th>
+                        <th>Odd</th>
+                        <th>Type</th>
+                        <th>Result</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {slip.games.map((g, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td>{g.home}</td>
+                          <td>{g.away}</td>
+                          <td>{(parseFloat(g.odds) || 1).toFixed(2)}</td>
+                          <td>{g.type}</td>
+                          <td>
+                            {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div>🔒 Premium content</div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>
