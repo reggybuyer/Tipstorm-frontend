@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 const API = process.env.REACT_APP_API_BASE;
 
 export default function UserRegister() {
@@ -14,7 +13,6 @@ export default function UserRegister() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
     const data = await res.json();
     if (!data.success) {
       alert("Register failed");
@@ -25,7 +23,7 @@ export default function UserRegister() {
   }
 
   return (
-    <div>
+    <div className="auth-box">
       <h2>Register</h2>
       <input
         type="email"
@@ -39,7 +37,16 @@ export default function UserRegister() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={register}>Register</button>
+      <button className="btn-register" onClick={register}>Register</button>
+      <p style={{ marginTop: "15px" }}>
+        Already have an account?{" "}
+        <span
+          style={{ color: "#3498db", cursor: "pointer" }}
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </span>
+      </p>
     </div>
   );
 } 

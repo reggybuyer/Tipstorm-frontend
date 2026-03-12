@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 const API = process.env.REACT_APP_API_BASE;
 
 export default function UserLogin() {
@@ -15,18 +14,14 @@ export default function UserLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
-
       if (!data.success) {
         alert("Login failed");
         return;
       }
-
       localStorage.setItem("token", data.token);
       localStorage.setItem("email", data.user.email);
       localStorage.setItem("role", data.user.role);
-
       alert("Welcome");
       navigate("/user");
     } catch {
@@ -35,7 +30,7 @@ export default function UserLogin() {
   }
 
   return (
-    <div>
+    <div className="auth-box">
       <h2>User Login</h2>
       <input
         type="email"
@@ -49,7 +44,16 @@ export default function UserLogin() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={login}>Login</button>
+      <button className="btn-login" onClick={login}>Login</button>
+      <p style={{ marginTop: "15px" }}>
+        Don't have an account?{" "}
+        <span
+          style={{ color: "#27ae60", cursor: "pointer" }}
+          onClick={() => navigate("/register")}
+        >
+          Register
+        </span>
+      </p>
     </div>
   );
 } 

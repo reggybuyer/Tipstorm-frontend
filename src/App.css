@@ -1,329 +1,151 @@
 /* GLOBAL */
-
-body{
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background:#f4f6fb;
-  margin:0;
-  color:#333;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6fb;
+  margin: 0;
+  color: #333;
 }
-
-a{
-  text-decoration:none;
+a {
+  text-decoration: none;
 }
 
 /* SECTION */
-
-.section{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
-}
-
-/* HEADER */
-
-.header-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
+.section {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
 }
 
 /* CARDS */
-
-.card{
-  background:white;
-  padding:20px;
-  margin-bottom:20px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.06);
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 /* TABLE */
-
-table{
-  width:100%;
-  border-collapse:collapse;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-th{
-  background:#f1f3f7;
-  padding:12px;
-  text-align:left;
-  font-size:14px;
+th {
+  background: #f1f3f7;
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
 }
-
-td{
-  padding:10px;
-  border-bottom:1px solid #eee;
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
-
-tr:hover{
-  background:#fafafa;
+tr:hover {
+  background: #fafafa;
 }
 
 /* INPUTS */
-
-input,select{
-  padding:10px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  width:100%;
-  margin-bottom:10px;
-  box-sizing:border-box;
+input,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  margin-bottom: 10px;
+  box-sizing: border-box;
 }
 
 /* BUTTONS */
-
-button{
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:13px;
+button {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+button:hover {
+  opacity: 0.9;
 }
 
-button:hover{
-  opacity:0.9;
+/* SPECIFIC BUTTONS */
+.btn-login {
+  background: #3498db;
+  color: white;
+}
+.btn-register {
+  background: #27ae60;
+  color: white;
+}
+.btn-logout {
+  background: #e74c3c;
+  color: white;
 }
 
-.btn{
-  background:#3498db;
-  color:white;
+/* AUTH BOX */
+.auth-box {
+  max-width: 400px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
-
-.btn-view{
-  background:#2ecc71;
-  color:white;
-}
-
-.btn-logout{
-  background:#e74c3c;
-  color:white;
-}
-
-.btn-plan{
-  background:#27ae60;
-  color:white;
-  padding:10px 16px;
-}
-
-/* BADGES */
-
-.plan-badge{
-  padding:5px 12px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.plan-badge.free{
-  background:#dff0d8;
-  color:#2e7d32;
-}
-
-.plan-badge.weekly{
-  background:#fff3cd;
-  color:#856404;
-}
-
-.plan-badge.monthly{
-  background:#d1ecf1;
-  color:#0c5460;
-}
-
-.plan-badge.vip{
-  background:#f8d7da;
-  color:#721c24;
-}
-
-/* SLIPS */
-
-.slip-card{
-  border:1px solid #eee;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-  background:#fafafa;
-}
-
-.slip-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-  font-weight:600;
-}
-
-/* GAME ROW */
-
-.game-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid #eee;
-  gap:10px;
-}
-
-.game-row span{
-  flex:1;
+.auth-box h2 {
+  margin-bottom: 25px;
 }
 
 /* ODDS BOX */
-
-.odd-box{
-  background:#111;
-  color:white;
-  padding:5px 10px;
-  border-radius:6px;
-  font-weight:bold;
-  text-align:center;
-  min-width:50px;
+.odd-box {
+  background: #111;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 50px;
 }
 
 /* RESULTS */
-
-.result-win{
-  color:#27ae60;
-  font-weight:bold;
+.result-win {
+  color: #27ae60;
+  font-weight: bold;
+}
+.result-loss {
+  color: #e74c3c;
+  font-weight: bold;
+}
+.result-pending {
+  color: #f39c12;
 }
 
-.result-loss{
-  color:#e74c3c;
-  font-weight:bold;
+/* SLIPS */
+.slip-card {
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  background: #fafafa;
 }
 
-.result-pending{
-  color:#f39c12;
+/* GAME ROW */
+.game-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  gap: 10px;
 }
-
-/* PAGINATION */
-
-.pagination{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin-top:15px;
-}
-
-/* LOGIN / REGISTER */
-
-.auth-box{
-  max-width:400px;
-  margin:60px auto;
-  background:white;
-  padding:30px;
-  border-radius:10px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-
-.auth-box h2{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-/* LANDING PAGE */
-
-.landing{
-  text-align:center;
-}
-
-.hero{
-  background:#111;
-  color:white;
-  padding:80px 20px;
-}
-
-.hero h1{
-  font-size:40px;
-  margin-bottom:10px;
-}
-
-.hero p{
-  margin-bottom:20px;
-}
-
-.hero-buttons a{
-  padding:12px 20px;
-  border-radius:6px;
-  margin:5px;
-  display:inline-block;
-}
-
-.btn-primary{
-  background:#27ae60;
-  color:white;
-}
-
-.btn-secondary{
-  background:#3498db;
-  color:white;
-}
-
-/* FEATURES */
-
-.features{
-  display:flex;
-  justify-content:center;
-  gap:30px;
-  padding:40px 20px;
-}
-
-.feature{
-  font-size:18px;
-}
-
-/* PLANS */
-
-.plans{
-  background:#f5f5f5;
-  padding:40px 20px;
-}
-
-.plan-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:20px;
-  max-width:900px;
-  margin:auto;
-}
-
-.plan-card{
-  background:white;
-  padding:25px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.08);
-}
-
-.plan-card.vip{
-  border:2px solid gold;
-}
-
-/* FOOTER */
-
-.footer{
-  padding:20px;
-  font-size:14px;
-  color:#777;
+.game-row span {
+  flex: 1;
 }
 
 /* MOBILE */
-
-@media (max-width:768px){
-
-  .game-row{
-    flex-direction:column;
-    align-items:flex-start;
+@media (max-width: 768px) {
+  .game-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
-
-  .slip-header{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:5px;
-  }
-
-  .features{
-    flex-direction:column;
-  }
-
 } 
