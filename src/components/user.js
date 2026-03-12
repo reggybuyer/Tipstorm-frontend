@@ -14,10 +14,12 @@ export default function User() {
     window.location.href = "/login";
   };
 
-  // Load user profile
+  /* ---------------- LOAD PROFILE ---------------- */
   const loadProfile = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (!data.success || !data.user) {
         logout();
@@ -31,10 +33,12 @@ export default function User() {
     }
   }, [token]);
 
-  // Load slips
+  /* ---------------- LOAD SLIPS ---------------- */
   const loadSlips = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/slips`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/slips`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       setSlips(data.slips || []);
     } catch {
@@ -42,6 +46,7 @@ export default function User() {
     }
   }, [token]);
 
+  /* ---------------- PLAN INFO ---------------- */
   const getRemainingDays = () => {
     if (!user?.expiresAt) return 0;
     return Math.max(0, Math.ceil((new Date(user.expiresAt) - new Date()) / 86400000));
@@ -75,6 +80,7 @@ export default function User() {
   if (loading) return <div className="section">Loading...</div>;
   if (!user) return <div className="section">Session expired.</div>;
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="section">
       <div className="header-row">
@@ -123,7 +129,7 @@ export default function User() {
                 <div className="slip-header">
                   <strong>{slip.date}</strong>{" "}
                   <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>{" "}
-                  <span>Total Odds: {(slip.totalOdds || 1).toFixed(2)}</span>
+                  <span>Total Odds: <span className="odd-box">{(slip.totalOdds || 1).toFixed(2)}</span></span>
                 </div>
 
                 {allowed ? (
@@ -144,9 +150,13 @@ export default function User() {
                           <td>{i + 1}</td>
                           <td>{g.home}</td>
                           <td>{g.away}</td>
-                          <td>{(parseFloat(g.odds) || 1).toFixed(2)}</td>
-                          <td>{g.type}</td>
-                          <td>
+                          <td><span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span></td>
+                          <td><span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g,'')}`}>{g.type}</span></td>
+                          <td className={
+                            g.result === "won" ? "result-win" :
+                            g.result === "lost" ? "result-loss" :
+                            "result-pending"
+                          }>
                             {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
                           </td>
                         </tr>
