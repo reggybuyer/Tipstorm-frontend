@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com/";
+const API =
+  process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com/";
 
 export default function Admin() {
   const token = localStorage.getItem("token");
@@ -13,7 +14,6 @@ export default function Admin() {
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
   const [page, setPage] = useState(1);
-  const [visitors, setVisitors] = useState([]);
   const limit = 10;
 
   // ---------------- HELPERS ----------------
@@ -47,23 +47,18 @@ export default function Admin() {
 
   const loadSlips = useCallback(
     async (newPage = 1) => {
-      const res = await fetch(`${API}/slips?page=${newPage}&limit=${limit}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${API}/slips?page=${newPage}&limit=${limit}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       setSlips(data.slips || []);
       setPage(newPage);
     },
     [limit, token]
   );
-
-  const loadVisitors = useCallback(async () => {
-    const res = await fetch(`${API}/visitors`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setVisitors(data.visitors || []);
-  }, [token]);
 
   // ---------------- USERS ----------------
   const deleteUser = useCallback(
@@ -141,7 +136,6 @@ export default function Admin() {
     updated[index][field] = value;
     setGames(updated);
   };
-
   const createSlip = async () => {
     if (!games.length) {
       alert("Add at least one game");
@@ -191,8 +185,7 @@ export default function Admin() {
     loadUsers();
     loadRequests();
     loadSlips(1);
-    loadVisitors();
-  }, [loadUsers, loadRequests, loadSlips, loadVisitors]);
+  }, [loadUsers, loadRequests, loadSlips]);
 
   // ---------------- UI ----------------
   return (
@@ -246,7 +239,6 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
-
         <table style={{ width: "100%" }}>
           <thead>
             <tr>
@@ -262,19 +254,49 @@ export default function Admin() {
             {games.map((g, i) => (
               <tr key={i}>
                 <td>{i + 1}</td>
-                <td><input value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} /></td>
-                <td><input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} /></td>
-                <td><input value={g.odd} type="number" onChange={(e) => updateGame(i, "odd", e.target.value)} className="odd-box" /></td>
-                <td><input value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)} placeholder="Over 1.5" className="plan-badge" /></td>
                 <td>
-                  <button onClick={() => { const updated = [...games]; updated.splice(i, 1); setGames(updated); }}>Remove</button>
+                  <input value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} />
+                </td>
+                <td>
+                  <input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} />
+                </td>
+                <td>
+                  <input
+                    value={g.odd}
+                    type="number"
+                    onChange={(e) => updateGame(i, "odd", e.target.value)}
+                    className="odd-box"
+                  />
+                </td>
+                <td>
+                  <input
+                    value={g.type}
+                    onChange={(e) => updateGame(i, "type", e.target.value)}
+                    placeholder="Over 1.5"
+                    className="plan-badge"
+                  />
+                </td>
+                <td>
+                  <button
+                    onClick={() => {
+                      const updated = [...games];
+                      updated.splice(i, 1);
+                      setGames(updated);
+                    }}
+                  >
+                    Remove
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <button onClick={addGameRow} className="btn btn-view">Add Game</button>
-        <button onClick={createSlip} className="btn btn-primary">Create Slip</button>
+        <button onClick={addGameRow} className="btn btn-view">
+          Add Game
+        </button>
+        <button onClick={createSlip} className="btn btn-primary">
+          Create Slip
+        </button>
       </div>
 
       {/* SLIPS */}
@@ -286,44 +308,53 @@ export default function Admin() {
               <strong>{slip.date}</strong>
               <span className={`plan-badge plan-${slip.access}`}>{badge(slip.access)}</span>
               <span>Total Odds: {parseFloat(slip.totalOdds).toFixed(2)}</span>
-              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>Delete Slip</button>
+              <button className="btn btn-logout" onClick={() => deleteSlip(slip._id)}>
+                Delete Slip
+              </button>
             </div>
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
-                <span>{g.home} vs {g.away}</span>
+                <span>
+                  {g.home} vs {g.away}
+                </span>
                 <span>
                   <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span> |
-                  <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, "")}`}>{g.type}</span>
+                  <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, "")}`}>
+                    {g.type}
+                  </span>
                 </span>
-                <span className={
-                  g.result === "won" ? "result-win" :
-                  g.result === "lost" ? "result-loss" : "result-pending"
-                }>
+                <span
+                  className={
+                    g.result === "won"
+                      ? "result-win"
+                      : g.result === "lost"
+                      ? "result-loss"
+                      : "result-pending"
+                  }
+                >
                   {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
                 </span>
-                <button className="btn btn-view" onClick={() => markResult(slip._id, i, "won")}>Won</button>
-                <button className="btn btn-logout" onClick={() => markResult(slip._id, i, "lost")}>Lost</button>
+                <button className="btn btn-view" onClick={() => markResult(slip._id, i, "won")}>
+                  Won
+                </button>
+                <button className="btn btn-logout" onClick={() => markResult(slip._id, i, "lost")}>
+                  Lost
+                </button>
               </div>
             ))}
           </div>
         ))}
         <div className="pagination">
-          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>Prev</button>
+          <button disabled={page <= 1} onClick={() => loadSlips(page - 1)}>
+            Prev
+          </button>
           <span>Page {page}</span>
-          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>Next</button>
+          <button disabled={slips.length < limit} onClick={() => loadSlips(page + 1)}>
+            Next
+          </button>
         </div>
-      </div>
-
-      {/* VISITORS */}
-      <div className="card">
-        <h3>Recent Visitors</h3>
-        {visitors.map((v, i) => (
-          <div key={i} className="game-row">
-            <span>{v.ip}</span>
-            <span>{new Date(v.visitedAt).toLocaleString()}</span>
-          </div>
-        ))}
       </div>
     </div>
   );
 } 
+
