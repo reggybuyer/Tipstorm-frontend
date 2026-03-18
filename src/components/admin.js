@@ -9,11 +9,11 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [slips, setSlips] = useState([]);
-  const [visitors, setVisitors] = useState([]);
   const [games, setGames] = useState([]);
   const [date, setDate] = useState("");
   const [access, setAccess] = useState("free");
   const [page, setPage] = useState(1);
+  const [visitors, setVisitors] = useState([]);
   const limit = 10;
 
   // ---------------- HELPERS ----------------
@@ -79,7 +79,7 @@ export default function Admin() {
   );
 
   // ---------------- REQUESTS ----------------
-  const approveRequest = useCallback(
+  const approve = useCallback(
     async (id, expiryDate) => {
       if (expiryDate && new Date(expiryDate) > new Date()) {
         alert("User still active");
@@ -136,7 +136,6 @@ export default function Admin() {
 
   // ---------------- CREATE SLIP ----------------
   const addGameRow = () => setGames([...games, { home: "", away: "", odd: "", type: "" }]);
-
   const updateGame = (index, field, value) => {
     const updated = [...games];
     updated[index][field] = value;
@@ -192,7 +191,7 @@ export default function Admin() {
     loadUsers();
     loadRequests();
     loadSlips(1);
-    loadVisitors(); // load visitor tracking
+    loadVisitors();
   }, [loadUsers, loadRequests, loadSlips, loadVisitors]);
 
   // ---------------- UI ----------------
@@ -200,7 +199,9 @@ export default function Admin() {
     <div className="section">
       <div className="header-row">
         <h2>Admin Dashboard</h2>
-        <button className="btn btn-logout" onClick={logout}>Logout</button>
+        <button className="btn btn-logout" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       {/* USERS */}
@@ -211,7 +212,9 @@ export default function Admin() {
             <span>{u.email}</span>
             <span className={`plan-badge plan-${u.plan}`}>{u.plan.toUpperCase()}</span>
             <span>Expiry: {u.expiresAt ? new Date(u.expiresAt).toDateString() : "No expiry"}</span>
-            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>Delete</button>
+            <button className="btn btn-logout" onClick={() => deleteUser(u._id)}>
+              Delete
+            </button>
           </div>
         ))}
       </div>
@@ -223,8 +226,12 @@ export default function Admin() {
           <div key={r._id} className="game-row">
             <span>{r.email}</span>
             <span className={`plan-badge plan-${r.plan}`}>{r.plan.toUpperCase()}</span>
-            <button className="btn btn-view" onClick={() => approveRequest(r._id, r.expiryDate)}>Activate</button>
-            <button className="btn btn-logout" onClick={() => deleteRequest(r._id)}>Delete</button>
+            <button className="btn btn-view" onClick={() => approve(r._id, r.expiryDate)}>
+              Activate
+            </button>
+            <button className="btn btn-logout" onClick={() => deleteRequest(r._id)}>
+              Delete
+            </button>
           </div>
         ))}
       </div>
@@ -239,6 +246,7 @@ export default function Admin() {
           <option value="monthly">Monthly</option>
           <option value="vip">VIP</option>
         </select>
+
         <table style={{ width: "100%" }}>
           <thead>
             <tr>
@@ -256,9 +264,11 @@ export default function Admin() {
                 <td>{i + 1}</td>
                 <td><input value={g.home} onChange={(e) => updateGame(i, "home", e.target.value)} /></td>
                 <td><input value={g.away} onChange={(e) => updateGame(i, "away", e.target.value)} /></td>
-                <td><input value={g.odd} type="number" onChange={(e) => updateGame(i, "odd", e.target.value)} className="odd-box"/></td>
-                <td><input value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)} placeholder="Over 1.5" className="plan-badge"/></td>
-                <td><button onClick={() => { const updated = [...games]; updated.splice(i, 1); setGames(updated);}}>Remove</button></td>
+                <td><input value={g.odd} type="number" onChange={(e) => updateGame(i, "odd", e.target.value)} className="odd-box" /></td>
+                <td><input value={g.type} onChange={(e) => updateGame(i, "type", e.target.value)} placeholder="Over 1.5" className="plan-badge" /></td>
+                <td>
+                  <button onClick={() => { const updated = [...games]; updated.splice(i, 1); setGames(updated); }}>Remove</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -281,8 +291,14 @@ export default function Admin() {
             {slip.games?.map((g, i) => (
               <div key={i} className="game-row">
                 <span>{g.home} vs {g.away}</span>
-                <span><span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span> | <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, "")}`}>{g.type}</span></span>
-                <span className={g.result === "won" ? "result-win" : g.result === "lost" ? "result-loss" : "result-pending"}>
+                <span>
+                  <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span> |
+                  <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, "")}`}>{g.type}</span>
+                </span>
+                <span className={
+                  g.result === "won" ? "result-win" :
+                  g.result === "lost" ? "result-loss" : "result-pending"
+                }>
                   {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
                 </span>
                 <button className="btn btn-view" onClick={() => markResult(slip._id, i, "won")}>Won</button>
@@ -301,11 +317,10 @@ export default function Admin() {
       {/* VISITORS */}
       <div className="card">
         <h3>Recent Visitors</h3>
-        {visitors.length === 0 && <p>No recent visits</p>}
-        {visitors.map((v) => (
-          <div key={v._id} className="game-row">
-            <span>IP: {v.ip}</span>
-            <span>Visited: {new Date(v.visitedAt).toLocaleString()}</span>
+        {visitors.map((v, i) => (
+          <div key={i} className="game-row">
+            <span>{v.ip}</span>
+            <span>{new Date(v.visitedAt).toLocaleString()}</span>
           </div>
         ))}
       </div>
