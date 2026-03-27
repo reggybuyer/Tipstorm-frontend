@@ -93,7 +93,6 @@ export default function User() {
         <span className={`plan-badge plan-${user.plan}`}>{user.plan.toUpperCase()} PLAN</span>
         <p>Expires: {user.expiresAt ? new Date(user.expiresAt).toDateString() : "No expiry"}</p>
         <p>Remaining: {getRemainingDays()} days</p>
-
         {user.plan !== "vip" && (
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
@@ -122,8 +121,7 @@ export default function User() {
           <p>No slips available</p>
         ) : (
           slips.map((slip) => {
-            const allowed =
-              slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+            const allowed = slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
             return (
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
@@ -131,7 +129,6 @@ export default function User() {
                   <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>{" "}
                   <span>Total Odds: <span className="odd-box">{(slip.totalOdds || 1).toFixed(2)}</span></span>
                 </div>
-
                 {allowed ? (
                   <table className="slip-games-table">
                     <thead>
@@ -145,22 +142,36 @@ export default function User() {
                       </tr>
                     </thead>
                     <tbody>
-                      {slip.games.map((g, i) => (
-                        <tr key={i}>
-                          <td>{i + 1}</td>
-                          <td>{g.home}</td>
-                          <td>{g.away}</td>
-                          <td><span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span></td>
-                          <td><span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g,'')}`}>{g.type}</span></td>
-                          <td className={
-                            g.result === "won" ? "result-win" :
-                            g.result === "lost" ? "result-loss" :
-                            "result-pending"
-                          }>
-                            {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
-                          </td>
-                        </tr>
-                      ))}
+                      {slip.games.map((g, i) => {
+                        const isLocked =
+                          user?.role !== "admin" &&
+                          user?.plan === "free" &&
+                          slip.access === "free" &&
+                          i >= 1; // Only game 1 visible
+
+                        return (
+                          <tr key={i}>
+                            <td>{i + 1}</td>
+                            <td className={isLocked ? "blurred" : ""}>{isLocked ? "🔒 Locked" : g.home}</td>
+                            <td className={isLocked ? "blurred" : ""}>{isLocked ? "🔒 Locked" : g.away}</td>
+                            <td className={isLocked ? "blurred" : ""}>
+                              {isLocked ? "—" : <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span>}
+                            </td>
+                            <td className={isLocked ? "blurred" : ""}>
+                              {isLocked ? "Premium" : (
+                                <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g,'')}`}>{g.type}</span>
+                              )}
+                            </td>
+                            <td className={
+                              g.result === "won" ? "result-win" :
+                              g.result === "lost" ? "result-loss" :
+                              "result-pending"
+                            }>
+                              {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 ) : (
@@ -171,6 +182,16 @@ export default function User() {
           })
         )}
       </div>
+
+      {/* BLURRED CSS */}
+      <style>{`
+        .blurred {
+          filter: blur(5px);
+          opacity: 0.6;
+          user-select: none;
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 } 
