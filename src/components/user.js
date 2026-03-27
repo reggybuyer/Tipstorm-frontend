@@ -105,9 +105,7 @@ export default function User() {
             <div className="manual-payment">
               <p>Playbill: <strong>625625</strong></p>
               <p>Acc Number: <strong>20170457</strong></p>
-              <p>
-                Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong>
-              </p>
+              <p>Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong></p>
             </div>
             <button className="btn btn-upgrade" onClick={requestActivation}>Request Upgrade</button>
           </div>
@@ -129,7 +127,6 @@ export default function User() {
                   <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>{" "}
                   <span>Total Odds: <span className="odd-box">{(slip.totalOdds || 1).toFixed(2)}</span></span>
                 </div>
-
                 {allowed ? (
                   <table className="slip-games-table">
                     <thead>
@@ -144,25 +141,14 @@ export default function User() {
                     </thead>
                     <tbody>
                       {slip.games.map((g, i) => {
-                        const isLocked =
-                          user?.role !== "admin" &&
-                          user?.plan === "free" &&
-                          slip.access === "free" &&
-                          i < 2; // Hide games 1 and 2
-
+                        const hideForFree = user?.plan === "free" && slip.access === "free" && (i === 0 || i === 1); // hide 1 and 2
                         return (
                           <tr key={i}>
                             <td>{i + 1}</td>
-                            <td className={isLocked ? "blurred" : ""}>{isLocked ? "🔒 Locked" : g.home}</td>
-                            <td className={isLocked ? "blurred" : ""}>{isLocked ? "🔒 Locked" : g.away}</td>
-                            <td className={isLocked ? "blurred" : ""}>
-                              {isLocked ? "—" : <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span>}
-                            </td>
-                            <td className={isLocked ? "blurred" : ""}>
-                              {isLocked ? "Premium" : (
-                                <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g,'')}`}>{g.type}</span>
-                              )}
-                            </td>
+                            <td>{g.home}</td>
+                            <td>{g.away}</td>
+                            <td>{hideForFree ? "—" : <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span>}</td>
+                            <td>{hideForFree ? "Premium" : <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, '')}`}>{g.type}</span>}</td>
                             <td className={
                               g.result === "won" ? "result-win" :
                               g.result === "lost" ? "result-loss" :
@@ -183,16 +169,6 @@ export default function User() {
           })
         )}
       </div>
-
-      {/* BLURRED CSS */}
-      <style>{`
-        .blurred {
-          filter: blur(5px);
-          opacity: 0.6;
-          user-select: none;
-          pointer-events: none;
-        }
-      `}</style>
     </div>
   );
 } 
