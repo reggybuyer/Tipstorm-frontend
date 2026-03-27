@@ -53,9 +53,9 @@ export default function User() {
   };
 
   const getAmount = () => {
-    if (planSelect === "weekly") return 500;
-    if (planSelect === "monthly") return 1000;
-    if (planSelect === "vip") return 1500;
+    if (planSelect === "weekly") return 200;   // reduced amount
+    if (planSelect === "monthly") return 500;  // reduced amount
+    if (planSelect === "vip") return 1000;     // reduced amount
     return 0;
   };
 
@@ -97,15 +97,17 @@ export default function User() {
           <div className="upgrade-card">
             <h4>Upgrade your plan</h4>
             <select value={planSelect} onChange={(e) => setPlanSelect(e.target.value)}>
-              <option value="weekly">Weekly - Ksh 500</option>
-              <option value="monthly">Monthly - Ksh 1000</option>
-              <option value="vip">VIP - Ksh 1500</option>
+              <option value="weekly">Weekly - Ksh 200</option>
+              <option value="monthly">Monthly - Ksh 500</option>
+              <option value="vip">VIP - Ksh 1000</option>
             </select>
             <div className="amount-display">Amount: <strong>Ksh {getAmount()}</strong></div>
             <div className="manual-payment">
               <p>Playbill: <strong>625625</strong></p>
               <p>Acc Number: <strong>20170457</strong></p>
-              <p>Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong></p>
+              <p>
+                Send your <strong>{user.email}</strong> and payment confirmation to WhatsApp: <strong>0789906001</strong>
+              </p>
             </div>
             <button className="btn btn-upgrade" onClick={requestActivation}>Request Upgrade</button>
           </div>
@@ -119,7 +121,8 @@ export default function User() {
           <p>No slips available</p>
         ) : (
           slips.map((slip) => {
-            const allowed = slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
+            const allowed =
+              slip.access === "free" || (user?.premium && (user.plan === "vip" || user.plan === slip.access));
             return (
               <div key={slip._id} className="slip-card">
                 <div className="slip-header">
@@ -140,25 +143,22 @@ export default function User() {
                       </tr>
                     </thead>
                     <tbody>
-                      {slip.games.map((g, i) => {
-                        const hideForFree = user?.plan === "free" && slip.access === "free" && (i === 0 || i === 1); // hide 1 and 2
-                        return (
-                          <tr key={i}>
-                            <td>{i + 1}</td>
-                            <td>{g.home}</td>
-                            <td>{g.away}</td>
-                            <td>{hideForFree ? "—" : <span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span>}</td>
-                            <td>{hideForFree ? "Premium" : <span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g, '')}`}>{g.type}</span>}</td>
-                            <td className={
-                              g.result === "won" ? "result-win" :
-                              g.result === "lost" ? "result-loss" :
-                              "result-pending"
-                            }>
-                              {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {slip.games.map((g, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td>{g.home}</td>
+                          <td>{g.away}</td>
+                          <td><span className="odd-box">{(parseFloat(g.odds) || 1).toFixed(2)}</span></td>
+                          <td><span className={`plan-badge plan-${g.type.toLowerCase().replace(/\s/g,'')}`}>{g.type}</span></td>
+                          <td className={
+                            g.result === "won" ? "result-win" :
+                            g.result === "lost" ? "result-loss" :
+                            "result-pending"
+                          }>
+                            {g.result === "won" ? "✅ Won" : g.result === "lost" ? "❌ Lost" : "⏳ Pending"}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 ) : (
