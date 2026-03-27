@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com";
+const API = process.env.REACT_APP_API_BASE || "https://tipstorm-backend.onrender.com/";
 
 export default function User() {
   const [slips, setSlips] = useState([]);
@@ -129,6 +129,7 @@ export default function User() {
                   <span className={`plan-badge plan-${slip.access}`}>{slip.access.toUpperCase()}</span>{" "}
                   <span>Total Odds: <span className="odd-box">{(slip.totalOdds || 1).toFixed(2)}</span></span>
                 </div>
+
                 {allowed ? (
                   <table className="slip-games-table">
                     <thead>
@@ -147,7 +148,7 @@ export default function User() {
                           user?.role !== "admin" &&
                           user?.plan === "free" &&
                           slip.access === "free" &&
-                          i >= 1; // Only game 1 visible
+                          i < 2; // Hide games 1 and 2
 
                         return (
                           <tr key={i}>
